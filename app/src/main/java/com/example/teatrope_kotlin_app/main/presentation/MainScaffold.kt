@@ -3,20 +3,15 @@ package com.example.teatrope_kotlin_app.main.presentation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.MovieFilter
+import androidx.compose.material.icons.outlined.ViewCarousel
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.teatrope_kotlin_app.main.presentation.screens.BookingsScreen
-import com.example.teatrope_kotlin_app.main.presentation.screens.DiscoverScreen
-import com.example.teatrope_kotlin_app.main.presentation.screens.HomeScreen
-import com.example.teatrope_kotlin_app.main.presentation.screens.ProfileScreen
+import androidx.navigation.compose.*
+import com.example.teatrope_kotlin_app.main.presentation.screens.*
 import com.example.teatrope_kotlin_app.navigation.Routes
 import com.example.teatrope_kotlin_app.ui.theme.AccentRed
 
@@ -32,23 +27,21 @@ fun MainScaffold(
     rootNav: NavHostController
 ) {
     val tabs = listOf(
-        BottomItem(Routes.Home, "Home") { Icon(Icons.Outlined.Home, null) },
-        BottomItem(Routes.Discover, "Discover") { Icon(Icons.Outlined.FavoriteBorder, null) },
-        BottomItem(Routes.Bookings, "Bookings") { Icon(Icons.Outlined.CalendarMonth, null) },
-        BottomItem(Routes.Profile, "Profile") { Icon(Icons.Outlined.AccountCircle, null) }
+        BottomItem(Routes.Home,       "Billboard")   { Icon(Icons.Outlined.ViewCarousel, null) },
+        BottomItem(Routes.ComingSoon, "Coming soon") { Icon(Icons.Outlined.MovieFilter,  null) },
+        BottomItem(Routes.Favorites,  "Favorites")   { Icon(Icons.Outlined.FavoriteBorder, null) },
+        BottomItem(Routes.Profile,    "Profile")     { Icon(Icons.Outlined.AccountCircle, null) }
     )
 
-    val innerNav = rememberNavController()
+    val inner = rememberNavController()
     var selected by remember { mutableStateOf(startDestination) }
 
     LaunchedEffect(startDestination) {
-        if (innerNav.currentDestination?.route != startDestination) {
-            innerNav.navigate(startDestination) {
-                popUpTo(0)
-                launchSingleTop = true
-            }
-            selected = startDestination
+        inner.navigate(startDestination) {
+            popUpTo(0)
+            launchSingleTop = true
         }
+        selected = startDestination
     }
 
     Scaffold(
@@ -59,8 +52,8 @@ fun MainScaffold(
                         selected = selected == item.route,
                         onClick = {
                             selected = item.route
-                            innerNav.navigate(item.route) {
-                                popUpTo(innerNav.graph.startDestinationId) { saveState = true }
+                            inner.navigate(item.route) {
+                                popUpTo(inner.graph.startDestinationId) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -77,20 +70,14 @@ fun MainScaffold(
         }
     ) { padding ->
         NavHost(
-            navController = innerNav,
+            navController = inner,
             startDestination = Routes.Home,
             modifier = Modifier.padding(padding)
         ) {
-            composable(Routes.Home) {
-                HomeScreen(
-                    onOpenDetail = { showId ->
-                        rootNav.navigate("detail/$showId")
-                    }
-                )
-            }
-            composable(Routes.Discover) { DiscoverScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }) }
-            composable(Routes.Bookings) { BookingsScreen() }
-            composable(Routes.Profile) { ProfileScreen() }
+            composable(Routes.Home)        { HomeScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }, onOpenNotifications = { rootNav.navigate(Routes.Notifications) }) }
+            composable(Routes.ComingSoon)  { ComingSoonScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }) }
+            composable(Routes.Favorites)   { FavoritesScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }) }
+            composable(Routes.Profile)     { ProfileScreen() }
         }
     }
 }

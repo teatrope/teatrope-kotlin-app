@@ -30,8 +30,11 @@ import com.example.teatrope_kotlin_app.ui.theme.*
 private data class ShowCard(val id: String, val title: String, val posterRes: Int)
 
 @Composable
-fun HomeScreen(onOpenDetail: (String) -> Unit) {
-    // ===== MOCK DATA (1 show mínimo para test) =====
+fun HomeScreen(
+    onOpenDetail: (String) -> Unit,
+    onOpenNotifications: () -> Unit
+) {
+    // ===== MOCK DATA =====
     val featured = listOf(
         ShowCard("los-dioses", "Los dioses del teatro", R.drawable.ic_launcher_foreground),
         ShowCard("un-robo", "Un robo hasta las patas", R.drawable.ic_launcher_foreground),
@@ -47,23 +50,44 @@ fun HomeScreen(onOpenDetail: (String) -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
-            .background(brush = Brush.verticalGradient(listOf(SurfaceDeep, Color(0xFF0D1017))))
+            .background(
+                brush = Brush.verticalGradient(
+                    listOf(SurfaceDeep, Color(0xFF0D1017))
+                )
+            )
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-
         // ===== Header =====
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("teatrope", color = AccentRed, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "teatrope",
+                color = AccentRed,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconButton(onClick = { /* TODO: notifications */ }) { Icon(Icons.Outlined.Notifications, null) }
-                Surface(shape = RoundedCornerShape(12.dp), color = Color(0x18FFFFFF), modifier = Modifier.size(28.dp)) {}
+                IconButton(onClick = onOpenNotifications) {
+                    Icon(Icons.Outlined.Notifications, null)
+                }
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0x18FFFFFF),
+                    modifier = Modifier.size(28.dp)
+                ) {}
             }
         }
 
         Spacer(Modifier.height(12.dp))
 
         // ===== Filtros arriba =====
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             DropdownSmall(label = "Choose city", value = city, onClick = { /* TODO selector */ })
             OutlinedTextField(
                 value = search,
@@ -81,9 +105,15 @@ fun HomeScreen(onOpenDetail: (String) -> Unit) {
                     unfocusedTextColor = TextPrimary
                 ),
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.weight(1f).height(44.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp)
             )
-            Surface(shape = RoundedCornerShape(10.dp), color = Color(0x18FFFFFF), modifier = Modifier.size(44.dp)) {}
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = Color(0x18FFFFFF),
+                modifier = Modifier.size(44.dp)
+            ) {}
         }
 
         Spacer(Modifier.height(14.dp))
@@ -98,7 +128,11 @@ fun HomeScreen(onOpenDetail: (String) -> Unit) {
         Spacer(Modifier.height(14.dp))
 
         // ===== Segmentado Services / Theaters =====
-        Segmented(options = listOf("Services", "Theaters"), selectedIndex = tab, onSelect = { tab = it })
+        Segmented(
+            options = listOf("Services", "Theaters"),
+            selectedIndex = tab,
+            onSelect = { tab = it }
+        )
 
         Spacer(Modifier.height(14.dp))
 
@@ -138,7 +172,7 @@ fun HomeScreen(onOpenDetail: (String) -> Unit) {
     }
 }
 
-/* ----- Helpers locales para Home ----- */
+/* ---------- Helpers locales ---------- */
 
 @Composable
 private fun DropdownSmall(label: String, value: String, onClick: () -> Unit) {
@@ -164,11 +198,16 @@ private fun PromoCard(title: String, cta: String, onClick: () -> Unit) {
             .clip(RoundedCornerShape(20.dp))
             .background(Color(0x14FFFFFF))
             .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
             Text(title, color = TextPrimary)
         }
-        PrimaryCTA(text = cta, onClick = onClick, modifier = Modifier.width(90.dp))
+        PrimaryCTA(
+            text = cta,
+            onClick = onClick,
+            modifier = Modifier.width(90.dp)
+        )
     }
 }
