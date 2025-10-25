@@ -15,16 +15,13 @@ import com.example.teatrope_kotlin_app.main.presentation.screens.*
 import com.example.teatrope_kotlin_app.navigation.Routes
 import com.example.teatrope_kotlin_app.ui.theme.AccentRed
 
-data class BottomItem(
-    val route: String,
-    val label: String,
-    val icon: @Composable () -> Unit
-)
+data class BottomItem(val route: String, val label: String, val icon: @Composable () -> Unit)
 
 @Composable
 fun MainScaffold(
     startDestination: String,
-    rootNav: NavHostController
+    rootNav: NavHostController,
+    onLogout: () -> Unit
 ) {
     val tabs = listOf(
         BottomItem(Routes.Home,       "Billboard")   { Icon(Icons.Outlined.ViewCarousel, null) },
@@ -37,10 +34,7 @@ fun MainScaffold(
     var selected by remember { mutableStateOf(startDestination) }
 
     LaunchedEffect(startDestination) {
-        inner.navigate(startDestination) {
-            popUpTo(0)
-            launchSingleTop = true
-        }
+        inner.navigate(startDestination) { popUpTo(0); launchSingleTop = true }
         selected = startDestination
     }
 
@@ -53,7 +47,7 @@ fun MainScaffold(
                         onClick = {
                             selected = item.route
                             inner.navigate(item.route) {
-                                popUpTo(inner.graph.startDestinationId) { saveState = true }
+                                popUpTo(inner.graph.startDestinationId){ saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -61,23 +55,24 @@ fun MainScaffold(
                         icon = item.icon,
                         label = { Text(item.label) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = AccentRed,
-                            selectedTextColor = AccentRed
+                            selectedIconColor = AccentRed, selectedTextColor = AccentRed
                         )
                     )
                 }
             }
         }
     ) { padding ->
-        NavHost(
-            navController = inner,
-            startDestination = Routes.Home,
-            modifier = Modifier.padding(padding)
-        ) {
-            composable(Routes.Home)        { HomeScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }, onOpenNotifications = { rootNav.navigate(Routes.Notifications) }) }
+        NavHost(navController = inner, startDestination = Routes.Home, modifier = Modifier.padding(padding)) {
+            composable(Routes.Home) {
+                HomeScreen(
+                    onOpenDetail = { id -> rootNav.navigate("detail/$id") },
+                    onOpenNotifications = { rootNav.navigate(Routes.Notifications) },
+                    onOpenTheater = { tid -> rootNav.navigate("theater/$tid") }
+                )
+            }
             composable(Routes.ComingSoon)  { ComingSoonScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }) }
             composable(Routes.Favorites)   { FavoritesScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }) }
-            composable(Routes.Profile)     { ProfileScreen() }
+            composable(Routes.Profile)     { ProfileScreen(onOpenSettings = { rootNav.navigate(Routes.Settings) }, onLogout = onLogout) }
         }
     }
 }
