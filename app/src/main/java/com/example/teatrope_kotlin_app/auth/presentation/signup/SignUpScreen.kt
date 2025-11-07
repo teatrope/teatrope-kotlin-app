@@ -10,10 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.teatrope_kotlin_app.auth.presentation.components.*
-import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpState
-import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpViewModel
+//import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpState
+//import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpViewModel
 
 @Composable
 fun SignUpScreen(
@@ -126,3 +126,4 @@ fun SignUpScreen(
     }
 
 }
+
