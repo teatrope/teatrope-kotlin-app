@@ -14,6 +14,7 @@ import androidx.navigation.compose.*
 import com.example.teatrope_kotlin_app.main.presentation.screens.*
 import com.example.teatrope_kotlin_app.navigation.Routes
 import com.example.teatrope_kotlin_app.ui.theme.AccentRed
+import com.example.teatrope_kotlin_app.main.presentation.screens.HomeScreen
 
 data class BottomItem(val route: String, val label: String, val icon: @Composable () -> Unit)
 

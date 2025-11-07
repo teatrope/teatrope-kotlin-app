@@ -10,7 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teatrope_kotlin_app.auth.presentation.components.*
+import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpState
+import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpViewModel
 
 @Composable
 fun SignUpScreen(
@@ -22,7 +25,12 @@ fun SignUpScreen(
     var confirm by remember { mutableStateOf("") }
     var remember by remember { mutableStateOf(false) }
 
-    val canSubmit = email.isNotBlank() && password.length >= 6 && password == confirm
+    val vm: SignUpViewModel = hiltViewModel()
+    val state by vm.state.collectAsState()
+
+    val isLoading = state is SignUpState.Loading
+
+    val canSubmit = email.isNotBlank() && password.length >= 8 && password == confirm && !isLoading
 
     AuthBackground {
         Column(
@@ -89,15 +97,32 @@ fun SignUpScreen(
                     text = "Sign up",
                     enabled = canSubmit
                 ) {
+
                     onSignUp(email.trim(), password, remember)
                 }
 
+                when (val s = state) {
+                    is SignUpState.Loading -> {
+                        Spacer(Modifier.height(8.dp))
+                        Text("Creating account...", color = MaterialTheme.colorScheme.primary)
+                    }
+                    is SignUpState.Error -> {
+                        Spacer(Modifier.height(8.dp))
+                        Text(s.message, color = MaterialTheme.colorScheme.error)
+                    }
+                    else -> Unit
+                }
+
                 Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("Already have an account? ")
                     UnderlineLink("Sign in") { onGoToSignIn() }
                 }
             }
         }
     }
+
 }

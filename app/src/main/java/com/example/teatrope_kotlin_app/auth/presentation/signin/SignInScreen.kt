@@ -10,7 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teatrope_kotlin_app.auth.presentation.components.*
+import com.example.teatrope_kotlin_app.auth.presentation.signin.SignInState
+import com.example.teatrope_kotlin_app.auth.presentation.signin.SignInViewModel
 
 @Composable
 fun SignInScreen(
@@ -21,6 +24,12 @@ fun SignInScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var remember by remember { mutableStateOf(false) }
+
+
+    val vm: SignInViewModel = hiltViewModel()
+    val state by vm.state.collectAsState()
+
+    val isLoading = state is SignInState.Loading
 
     AuthBackground {
         Column(
@@ -76,17 +85,35 @@ fun SignInScreen(
                 Spacer(Modifier.height(14.dp))
                 PrimaryButton(
                     text = "Sign in",
-                    enabled = email.isNotBlank() && password.isNotBlank()
+                    enabled = email.isNotBlank() && password.isNotBlank() && !isLoading
                 ) {
+
                     onSignIn(email.trim(), password, remember)
                 }
 
+                when (val s = state) {
+                    is SignInState.Loading -> {
+                        Spacer(Modifier.height(8.dp))
+                        Text("Signing in...", color = MaterialTheme.colorScheme.primary)
+                    }
+                    is SignInState.Error -> {
+                        Spacer(Modifier.height(8.dp))
+                        Text(s.message, color = MaterialTheme.colorScheme.error)
+                    }
+                    else -> Unit
+                }
+
                 Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("Don’t have an account? ")
                     UnderlineLink("Sign up") { onGoToSignUp() }
                 }
             }
         }
     }
+
+
 }
