@@ -68,7 +68,8 @@ fun MainScaffold(
                 HomeScreen(
                     onOpenDetail = { id -> rootNav.navigate("detail/$id") },
                     onOpenNotifications = { rootNav.navigate(Routes.Notifications) },
-                    onOpenTheater = { tid -> rootNav.navigate("theater/$tid") }
+                    onOpenTheater = { tid -> rootNav.navigate("theater/$tid") },
+                    onOpenTheatersList = { rootNav.navigate(Routes.Theaters) }
                 )
             }
             composable(Routes.ComingSoon)  { ComingSoonScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }) }

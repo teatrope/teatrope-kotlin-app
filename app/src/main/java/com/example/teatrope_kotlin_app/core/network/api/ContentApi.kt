@@ -25,10 +25,26 @@ data class PersonaDto(
 )
 data class TeatroDto(
     @SerializedName("id") val id: String,
-    @SerializedName("nombre") val nombre: String,
-    @SerializedName("ciudad") val ciudad: String?,
-    @SerializedName("direccion") val direccion: String?
+    @SerializedName("nombre") val nombre: String? = null,
+    @SerializedName("direccion") val direccion: String? = null,
+    @SerializedName("distrito") val distrito: String? = null,
+    @SerializedName("latitud") val latitud: Double? = null,
+    @SerializedName("longitud") val longitud: Double? = null,
+    @SerializedName("imagen_url") val imagenUrl: String? = null,
+    @SerializedName("descripcion") val descripcion: String? = null,
 )
+
+data class TeatroCreateRequest(
+    @SerializedName("nombre") val nombre: String,
+    @SerializedName("direccion") val direccion: String? = null,
+    @SerializedName("distrito") val distrito: String? = null,
+    @SerializedName("latitud") val latitud: Double? = null,
+    @SerializedName("longitud") val longitud: Double? = null,
+    @SerializedName("imagen_url") val imagenUrl: String? = null,
+    @SerializedName("descripcion") val descripcion: String? = null,
+)
+
+typealias TeatroUpdateRequest = TeatroCreateRequest
 
 interface ContentApi {
     // Funciones
@@ -74,16 +90,23 @@ interface ContentApi {
     suspend fun personasDelete(@Path("id") id: String): Response<Unit>
 
     // Teatros
+
     @GET("content/teatros/")
-    suspend fun teatrosList(): Response<List<TeatroDto>>
+    suspend fun getTeatros(): Response<List<TeatroDto>>
     @POST("content/teatros/")
-    suspend fun teatrosCreate(@Body body: TeatroDto): Response<TeatroDto>
+    suspend fun createTeatro(@Body body: TeatroCreateRequest): Response<TeatroDto>
     @GET("content/teatros/{id}/")
-    suspend fun teatrosRead(@Path("id") id: String): Response<TeatroDto>
+    suspend fun getTeatro(@Path("id") id: String): Response<TeatroDto>
     @PUT("content/teatros/{id}/")
-    suspend fun teatrosUpdate(@Path("id") id: String, @Body body: TeatroDto): Response<TeatroDto>
+    suspend fun updateTeatro(
+        @Path("id") id: String,
+        @Body body: TeatroUpdateRequest
+    ): Response<TeatroDto>
     @PATCH("content/teatros/{id}/")
-    suspend fun teatrosPartialUpdate(@Path("id") id: String, @Body patch: Map<String, Any?>): Response<TeatroDto>
+    suspend fun patchTeatro(
+        @Path("id") id: String,
+        @Body patch: Map<String, @JvmSuppressWildcards Any?>
+    ): Response<TeatroDto>
     @DELETE("content/teatros/{id}/")
-    suspend fun teatrosDelete(@Path("id") id: String): Response<Unit>
+    suspend fun deleteTeatro(@Path("id") id: String): Response<Unit>
 }

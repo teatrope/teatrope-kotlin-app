@@ -6,6 +6,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.teatrope_kotlin_app.auth.presentation.signin.SignInScreen
 import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpScreen
@@ -30,6 +31,8 @@ object Routes {
     const val Favorites = "favorites"
     const val Profile = "profile"
     const val Detail = "detail/{showId}"
+
+    const val Theaters = "theaters"
     const val TheaterDetail = "theater/{theaterId}"
     const val Notifications = "notifications"
     const val Settings = "settings"
@@ -179,6 +182,16 @@ fun RootNav(startInMain: Boolean = false) {
                     onOpenShow = { id -> nav.navigate("detail/$id") }
                 )
             }
+
+            composable(Routes.Theaters) {
+                com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListScreen(
+                    onOpenTheater = { theaterId: String ->
+                        nav.navigate("theater/$theaterId")
+                    }
+                )
+            }
+
+
         }
     }
 }
