@@ -26,9 +26,10 @@ import com.example.teatrope_kotlin_app.core.network.api.TeatroDto
 import com.example.teatrope_kotlin_app.main.presentation.components.PrimaryCTA
 import com.example.teatrope_kotlin_app.ui.theme.*
 import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterDetailViewModel
+import com.example.teatrope_kotlin_app.core.ui.thumbUrl
 import androidx.compose.material.icons.Icons
 
-// --- Helpers compatibles sin romper tu DTO: requieren kotlin-reflect (ver paso 3) ---
+// --- Helpers  ---
 private val TeatroDto.imageUrlCompat: String?
     get() = try {
         val f1 = this::class.members.firstOrNull { it.name == "image_url" }?.call(this) as? String
@@ -74,12 +75,12 @@ fun TheaterDetailScreen(
             ) {
                 Box(Modifier.fillMaxWidth().height(240.dp)) {
                     AsyncImage(
-                        model = t.imageUrlCompat,
-                        placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                        error = painterResource(R.drawable.ic_launcher_foreground),
-                        contentDescription = t.nombre,
+                        model = state.item?.thumbUrl,
+                        contentDescription = state.item?.nombre,
+                        modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                        error = painterResource(R.drawable.ic_launcher_foreground)
                     )
                     Surface(
                         onClick = onBack,

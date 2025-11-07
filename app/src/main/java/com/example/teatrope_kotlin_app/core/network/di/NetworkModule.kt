@@ -27,7 +27,7 @@ object NetworkModule {
             .addInterceptor { chain ->
                 val t = tokenProvider.getToken()
                 val req = chain.request().newBuilder()
-                    .apply { if (!t.isNullOrBlank()) header("Authorization", "Token $t") } // OJO: "Token" no "Bearer"
+                    .apply { if (!t.isNullOrBlank()) header("Authorization", "Token $t") }
                     .build()
                 chain.proceed(req)
             }
@@ -37,7 +37,7 @@ object NetworkModule {
     @Provides @Singleton
     fun provideRetrofit(okHttp: OkHttpClient): Retrofit =
         Retrofit.Builder()
-            .baseUrl(BuildConfig.API_BASE_URL) // Debe terminar en /api/
+            .baseUrl(BuildConfig.API_BASE_URL) // Determina el api
             .client(okHttp)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

@@ -18,7 +18,7 @@ class AuthRepository @Inject constructor(
         if (!res.isSuccessful) error(parseError(res))
 
         val token = res.body()?.token ?: error("Token vacío del backend")
-        tokenProvider.setToken(token)   // guarda para el interceptor
+        tokenProvider.setToken(token)
     }
 
     suspend fun register(username: String, email: String, password: String): Result<Unit> =

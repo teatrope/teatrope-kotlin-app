@@ -7,6 +7,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.platform.LocalContext
+import coil.Coil
+import coil.ImageLoader
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
@@ -27,6 +30,14 @@ import com.example.teatrope_kotlin_app.R
 import com.example.teatrope_kotlin_app.main.presentation.components.Segmented
 import com.example.teatrope_kotlin_app.main.presentation.components.PrimaryCTA
 import com.example.teatrope_kotlin_app.ui.theme.*
+import com.example.teatrope_kotlin_app.content.presentation.theaters.FeaturedTheatersRow
+
+
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListViewModel
+import com.example.teatrope_kotlin_app.core.ui.thumbUrl
+/* ======================= */
 
 private data class ShowCard(val id: String, val title: String, val posterRes: Int)
 private data class TheaterCard(val id: String, val name: String, val photoRes: Int)
@@ -36,7 +47,6 @@ fun HomeScreen(
     onOpenDetail: (String) -> Unit,
     onOpenNotifications: () -> Unit,
     onOpenTheater: (String) -> Unit,
-
     onOpenTheatersList: () -> Unit = {}
 ) {
     val shows = listOf(
@@ -44,11 +54,18 @@ fun HomeScreen(
         ShowCard("un-robo", "Un robo hasta las patas", R.drawable.ic_launcher_foreground),
         ShowCard("traviata", "La Traviata", R.drawable.ic_launcher_foreground),
     )
+    //
     val theaters = listOf(
         TheaterCard("tml", "Teatro Municipal de Lima", R.drawable.ic_launcher_foreground),
         TheaterCard("segura", "Teatro Segura", R.drawable.ic_launcher_foreground),
         TheaterCard("plaza", "Teatro La Plaza", R.drawable.ic_launcher_foreground),
     )
+
+
+    val theatersVm: TheaterListViewModel = hiltViewModel()
+    val theatersState by theatersVm.state.collectAsStateWithLifecycle()
+    val vm: com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListViewModel = hiltViewModel()
+    val state by vm.state.collectAsStateWithLifecycle()
 
     var city by remember { mutableStateOf("Lima") }
     var district by remember { mutableStateOf("Surco") }
@@ -62,7 +79,11 @@ fun HomeScreen(
             .background(brush = Brush.verticalGradient(listOf(SurfaceDeep, Color(0xFF0D1017))))
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text("teatrope", color = AccentRed, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 IconButton(onClick = onOpenNotifications) { Icon(Icons.Outlined.Notifications, null) }
@@ -83,7 +104,9 @@ fun HomeScreen(
                     cursorColor = AccentRed, focusedTextColor = TextPrimary, unfocusedTextColor = TextPrimary
                 ),
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.weight(1f).height(44.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp)
             )
             Surface(shape = RoundedCornerShape(10.dp), color = Color(0x18FFFFFF), modifier = Modifier.size(44.dp)) {}
         }
@@ -100,21 +123,29 @@ fun HomeScreen(
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             DropdownSmall("City", city) { /* TODO */ }
-            DropdownSmall(if (tab==0) "Genre" else "District", if (tab==0) genre else district) { /* TODO */ }
+            DropdownSmall(if (tab == 0) "Genre" else "District", if (tab == 0) genre else district) { /* TODO */ }
         }
 
         Spacer(Modifier.height(18.dp))
 
         if (tab == 0) {
+            //
             Text("Now playing", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 items(shows) { show ->
-                    Column(Modifier.width(160.dp).clickable { onOpenDetail(show.id) }) {
+                    Column(
+                        Modifier
+                            .width(160.dp)
+                            .clickable { onOpenDetail(show.id) }
+                    ) {
                         Image(
                             painter = painterResource(show.posterRes), contentDescription = show.title,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.height(200.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp))
+                            modifier = Modifier
+                                .height(200.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(show.title, maxLines = 2)
@@ -131,22 +162,59 @@ fun HomeScreen(
                 TextButton(onClick = onOpenTheatersList) { Text("Browse all") }
             }
             Spacer(Modifier.height(8.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                items(theaters) { t ->
-                    Column(Modifier.width(200.dp).clickable { onOpenTheater(t.id) }) {
-                        Image(
-                            painter = painterResource(t.photoRes), contentDescription = t.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.height(140.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp))
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(t.name, maxLines = 2)
-                    }
+
+            val ctx = LocalContext.current
+            val imageLoader: ImageLoader = Coil.imageLoader(ctx)
+
+
+            if (!state.isLoading && state.error == null) {
+                FeaturedTheatersRow(
+                    items = theatersState.items.take(10),
+                    onOpen = onOpenTheater,
+                    imageLoader = imageLoader
+                )
+
+        }
+
+            when {
+                theatersState.isLoading -> Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
+
+                theatersState.error != null -> Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        theatersState.error ?: "Error",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = { theatersVm.refresh() }) { Text("Reintentar") }
+                }
+
+                else -> {
+                    // prioriza los que tienen imagen; si no hay, usa toda la lista
+                    val featured = theatersState.items.filter { it.thumbUrl != null }
+                    FeaturedTheatersRow(
+                        items = if (featured.isNotEmpty()) featured else theatersState.items,
+                        onOpen = onOpenTheater
+                    )
+                    Spacer(Modifier.height(16.dp))
                 }
             }
         }
     }
 }
 
-@Composable private fun DropdownSmall(label: String, value: String, onClick: () -> Unit) { /* igual que antes */ }
-@Composable private fun PromoCard(title: String, cta: String, onClick: () -> Unit) { /* igual que antes */ }
+
+@Composable
+private fun DropdownSmall(label: String, value: String, onClick: () -> Unit) { /* */ }
+
+@Composable
+private fun PromoCard(title: String, cta: String, onClick: () -> Unit) { /*  */ }

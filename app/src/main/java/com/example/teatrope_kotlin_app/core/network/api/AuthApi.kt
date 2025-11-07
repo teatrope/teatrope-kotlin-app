@@ -30,8 +30,7 @@ data class TokenLoginRequest(
 )
 
 data class TokenLoginResponse(
-    // Djoser devuelve "auth_token". Si tu backend devuelve "token",
-    // igual se mapeará porque dejamos ambos aliases.
+
     @SerializedName(value = "auth_token", alternate = ["token"])
     val token: String = "",
 
@@ -59,7 +58,7 @@ interface AuthApi {
     @POST("auth/token/logout/")
     suspend fun tokenLogout(): Response<Unit>
 
-    // ---- Users (lista / CRUD) ----
+    // ---- Users  ----
     @GET("auth/users/")
     suspend fun usersList(): Response<List<UserDto>>
 
@@ -84,7 +83,7 @@ interface AuthApi {
     @DELETE("auth/users/{id}/")
     suspend fun usersDelete(@Path("id") id: String): Response<Unit>
 
-    // ---- Endpoints alternativos (no se quitan) ----
+    // ---- Endpoints  ----
     @POST("auth/users/login/")
     suspend fun usersLogin(@Body body: TokenLoginRequest): Response<TokenLoginResponse>
 
