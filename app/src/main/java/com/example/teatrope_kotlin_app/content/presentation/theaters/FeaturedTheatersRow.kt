@@ -1,13 +1,12 @@
 package com.example.teatrope_kotlin_app.content.presentation.theaters
 
 import android.util.Log
-import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +26,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -54,7 +52,6 @@ fun FeaturedTheatersRow(
         items(items, key = { it.id }) { t ->
             TheaterCardFancy(
                 title = t.nombre.orEmpty(),
-
                 imageUrl = t.imageUrl,
                 onClick = { onOpen(t.id) },
                 imageLoader = imageLoader
@@ -74,7 +71,7 @@ private fun TheaterCardFancy(
     var pressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
         targetValue = if (pressed) 0.97f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        animationSpec = spring(stiffness = 300f),
         label = "pressScale"
     )
 
@@ -84,33 +81,20 @@ private fun TheaterCardFancy(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         modifier = modifier
             .width(210.dp)
-            .graphicsLayer { this.scaleX = scale; this.scaleY = scale }
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick,
-                onClickLabel = "Abrir teatro",
-                enabled = true,
-
-            ).pointerInput(Unit) {
-
-            }
-            .then(
-                Modifier
-                    .padding(vertical = 4.dp)
-            ),
+                onClick = onClick
+            )
+            .padding(vertical = 4.dp)
     ) {
         val ctx = LocalContext.current
-        val model: Any = imageUrl?.trim()
-            ?.takeIf { it.isNotEmpty() }
-            ?: R.drawable.ic_placeholder
+        val model: Any = imageUrl?.trim()?.takeIf { it.isNotEmpty() } ?: R.drawable.ic_placeholder
 
         Box {
             SubcomposeAsyncImage(
-                model = ImageRequest.Builder(ctx)
-                    .data(model)
-                    .crossfade(true)
-                    .build(),
+                model = ImageRequest.Builder(ctx).data(model).crossfade(true).build(),
                 imageLoader = imageLoader,
                 contentDescription = title,
                 contentScale = ContentScale.Crop,
@@ -129,7 +113,7 @@ private fun TheaterCardFancy(
                     .clip(RoundedCornerShape(18.dp))
             )
 
-            // Gradiente para legibilidad del título
+            // Gradiente para mejorar legibilidad del título
             Box(
                 Modifier
                     .matchParentSize()
@@ -155,32 +139,27 @@ private fun TheaterCardFancy(
     }
 }
 
-
 @Composable
 private fun ShimmerBox() {
-    val shimmerColors = listOf(
-        Color(0xFF2A2A2A),
-        Color(0xFF3A3A3A),
-        Color(0xFF2A2A2A)
-    )
-    val transition = rememberInfiniteTransition(label = "shimmerTransition")
-    val xShimmer by transition.animateFloat(
+    val colors = listOf(Color(0xFF2A2A2A), Color(0xFF3A3A3A), Color(0xFF2A2A2A))
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    val x by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(animation = tween(1200)),
-        label = "xShimmer"
+        label = "x"
     )
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(16f / 9f)
+            .clip(RoundedCornerShape(18.dp))
             .background(
                 Brush.linearGradient(
-                    colors = shimmerColors,
-                    start = androidx.compose.ui.geometry.Offset(xShimmer - 1000f, 0f),
-                    end = androidx.compose.ui.geometry.Offset(xShimmer, 0f)
+                    colors = colors,
+                    start = androidx.compose.ui.geometry.Offset(x - 1000f, 0f),
+                    end = androidx.compose.ui.geometry.Offset(x, 0f)
                 )
             )
-            .clip(RoundedCornerShape(18.dp))
     )
 }

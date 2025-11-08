@@ -119,3 +119,45 @@ fun FavoriteToggle(isFav: Boolean, onChange: (Boolean) -> Unit) {
         )
     }
 }
+
+@Composable
+fun DropdownSmall(label: String, value: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onClick,
+        color = Color(0x33222C36),
+        shape = RoundedCornerShape(14.dp),
+        modifier = modifier.height(40.dp)
+    ) {
+        Row(
+            Modifier.padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, color = Color(0xFF9AA3AF), style = MaterialTheme.typography.labelSmall)
+            Spacer(Modifier.width(6.dp))
+            Text(value, color = Color.White, maxLines = 1)
+            Spacer(Modifier.width(6.dp))
+            Text("▾", color = Color.White)
+        }
+    }
+}
+
+@Composable
+fun PromoCard(title: String, cta: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        color = Color(0x33222C36),
+        shape = RoundedCornerShape(18.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                title,
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                modifier = Modifier.weight(1f)
+            )
+            Surface(onClick = onClick, color = Color(0xFFEF4444), shape = CircleShape) {
+                Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) { Text("➜") }
+            }
+        }
+    }
+}

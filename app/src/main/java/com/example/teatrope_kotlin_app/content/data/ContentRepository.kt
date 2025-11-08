@@ -16,8 +16,11 @@ class ContentRepository @Inject constructor(
 ) {
 
     /* ---------- OBRAS ---------- */
-    suspend fun getObras(): Result<List<ObraDto>> =
-        safe { api.obrasList() }
+    suspend fun getObras(): List<ObraDto> {
+        val resp = api.obrasList()
+        if (resp.isSuccessful) return resp.body().orEmpty()
+        error("HTTP ${resp.code()}")
+    }
 
     /* ---------- TEATROS ---------- */
     suspend fun listTeatros(): Result<List<TeatroDto>> =

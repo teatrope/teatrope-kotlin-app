@@ -5,31 +5,47 @@ import androidx.lifecycle.viewModelScope
 import com.example.teatrope_kotlin_app.content.data.ContentRepository
 import com.example.teatrope_kotlin_app.core.network.api.ObraDto
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+/** Estado plano que tu UI ya consume */
+data class ObrasUiState(
+    val items: List<ObraDto> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
 
 @HiltViewModel
 class ObrasViewModel @Inject constructor(
     private val repo: ContentRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<ObrasUiState>(ObrasUiState.Loading)
-    val state = _state.asStateFlow()
+    private val _state = MutableStateFlow(ObrasUiState(isLoading = true))
+    val state: StateFlow<ObrasUiState> = _state
 
-    fun cargar() = viewModelScope.launch {
-        _state.value = ObrasUiState.Loading
-        val r = repo.getObras()
-        _state.value = r.fold(
-            onSuccess = { ObrasUiState.Data(it) },
-            onFailure = { ObrasUiState.Error(it.message ?: "Error") }
-        )
+    init {
+        refresh()
     }
-}
 
-sealed interface ObrasUiState {
-    data object Loading : ObrasUiState
-    data class Data(val obras: List<ObraDto>) : ObrasUiState
-    data class Error(val msg: String) : ObrasUiState
+    /** Refresca y actualiza items/isLoading/error */
+    fun refresh() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            runCatching { repo.getObras() }
+                .onSuccess { list ->
+                    _state.update { it.copy(items = list, isLoading = false) }
+                }
+                .onFailure { e ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = e.message ?: "Error cargando obras"
+                        )
+                    }
+                }
+        }
+    }
 }
