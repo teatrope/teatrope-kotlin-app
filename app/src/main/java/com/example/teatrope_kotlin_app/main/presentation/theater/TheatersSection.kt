@@ -1,13 +1,14 @@
 package com.example.teatrope_kotlin_app.main.presentation.theater
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
-import com.example.teatrope_kotlin_app.content.presentation.theaters.FeaturedTheatersRow
 import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListUiState
 
 @Composable
@@ -45,20 +46,24 @@ fun TheatersSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    state.error ?: "Error",
+                    state.error ?: "",
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f)
                 )
                 TextButton(onClick = onRetry) { Text("Retry") }
             }
 
-            else -> {
-                FeaturedTheatersRow(
-                    items = state.items,
-                    onOpen = onOpenTheater,
-                    imageLoader = imageLoader
-                )
-                Spacer(Modifier.height(16.dp))
+            else -> LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = modifier.fillMaxWidth()
+            ) {
+                items(state.items, key = { it.id }) { theater ->
+                    TheaterCard(
+                        theater = theater,
+                        onClick = onOpenTheater
+                    )
+                }
             }
         }
     }
