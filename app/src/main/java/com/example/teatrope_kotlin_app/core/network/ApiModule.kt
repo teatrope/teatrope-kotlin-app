@@ -18,3 +18,5 @@ object ApiModule {
     @Provides @Singleton fun provideNotificationsApi(retrofit: Retrofit): NotificationsApi = retrofit.create(NotificationsApi::class.java)
     @Provides @Singleton fun provideTicketsApi(retrofit: Retrofit): TicketsApi = retrofit.create(TicketsApi::class.java)
 }
+
+

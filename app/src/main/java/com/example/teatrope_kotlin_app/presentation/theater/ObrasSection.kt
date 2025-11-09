@@ -7,11 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.teatrope_kotlin_app.core.network.api.ObraDto
+import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
+import com.example.teatrope_kotlin_app.domain.model.Play
+import com.example.teatrope_kotlin_app.core.ui.components.ObraCard
 
 @Composable
 fun ObrasSection(
-    items: List<ObraDto> = emptyList(),
+    items: List<ObraUi>,
     isLoading: Boolean = false,
     error: String? = null,
     onRetry: () -> Unit = {},
@@ -40,17 +42,14 @@ fun ObrasSection(
             TextButton(onClick = onRetry) { Text("Retry") }
         }
 
-        else -> {
-            //
-            Column(modifier = modifier.fillMaxWidth()) {
-                items.forEach { obra ->
-                    ListItem(
-                        headlineContent = { Text(obra.titulo) },
-                        supportingContent = { Text(obra.genero ?: "") },
-                        modifier = Modifier.clickable { onOpen(obra.id) }
-                    )
-                    Divider()
-                }
+        else -> Column(modifier = modifier.fillMaxWidth()) {
+            items.forEach { play ->
+                ListItem(
+                    headlineContent = { Text(play.titulo) },
+                    supportingContent = { Text(play.genero) },
+                    modifier = Modifier.clickable { onOpen(play.id) }
+                )
+                HorizontalDivider()
             }
         }
     }

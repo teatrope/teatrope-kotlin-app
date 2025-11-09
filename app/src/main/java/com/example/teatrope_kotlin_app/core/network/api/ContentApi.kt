@@ -1,25 +1,66 @@
 package com.example.teatrope_kotlin_app.core.network.api
 
+import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
 import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.*
 
-// ---------- DTOs ----------
 
+
+import retrofit2.http.*
+
+fun ObraDto.toUi(): ObraUi = ObraUi(
+    id = id,
+    titulo = titulo,
+    genero = genero,
+    imageUrl = imageUrl.orEmpty(),
+    teatroNombre = teatro.nombre,
+    buyUrl = buyUrl.orEmpty(),
+    director = directorNombre.orEmpty()
+)
+
+// ---------- DTOs ----------
 data class FuncionDto(
     @SerializedName("id") val id: String,
     @SerializedName("obra_id") val obraId: String?,
-    @SerializedName("fecha") val fecha: String?,   // ajusta a LocalDate si luego usas adaptador
+    @SerializedName("fecha") val fecha: String?,
     @SerializedName("hora") val hora: String?,
     @SerializedName("teatro_id") val teatroId: String?
 )
 
+
+data class TeatroDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("nombre") val nombre: String = "",
+    @SerializedName("descripcion") val descripcion: String? = null,
+    @SerializedName("calle") val calle: String? = null,        //
+    @SerializedName("distrito") val distrito: String? = null,
+    @SerializedName("latitud") val latitud: Double? = null,
+    @SerializedName("longitud") val longitud: Double? = null,
+    @SerializedName("image_url") val imageUrl: String? = null  //
+)
+
+
 data class ObraDto(
     @SerializedName("id") val id: String,
+    @SerializedName("teatro") val teatro: TeatroDto,
     @SerializedName("titulo") val titulo: String,
-    @SerializedName("descripcion") val descripcion: String? = null,
-    @SerializedName("genero") val genero: String? = null,
-    @SerializedName("imagen") val imagen: String? = null
+    @SerializedName("genero") val genero: String,
+    @SerializedName("director_nombre") val directorNombre: String? = null,
+    @SerializedName("director_rol") val directorRol: String? = null,
+    @SerializedName("image_url") val imageUrl: String? = null,
+    @SerializedName("buy_url") val buyUrl: String? = null
+)
+
+
+data class ObraWriteRequest(
+    @SerializedName("teatro") val teatroId: String,
+    @SerializedName("titulo") val titulo: String,
+    @SerializedName("genero") val genero: String,
+    @SerializedName("director_nombre") val directorNombre: String? = null,
+    @SerializedName("director_rol") val directorRol: String? = null,
+    @SerializedName("image_url") val imageUrl: String? = null,
+    @SerializedName("buy_url") val buyUrl: String? = null
 )
 
 data class PersonaDto(
@@ -29,18 +70,7 @@ data class PersonaDto(
 )
 
 
-data class TeatroDto(
-    @SerializedName("id") val id: String,
-    @SerializedName("nombre") val nombre: String = "",
-    @SerializedName("descripcion") val descripcion: String? = null,
-    @SerializedName("calle") val calle: String? = null,        // <- antes "direccion"
-    @SerializedName("distrito") val distrito: String? = null,
-    @SerializedName("latitud") val latitud: Double? = null,
-    @SerializedName("longitud") val longitud: Double? = null,
-    @SerializedName("image_url") val imageUrl: String? = null  // <- antes "imagen_url"
-)
-
-/** Requests para crear/actualizar (misma forma que el backend espera) */
+/** Requests Teatro */
 data class TeatroCreateRequest(
     @SerializedName("nombre") val nombre: String,
     @SerializedName("descripcion") val descripcion: String? = null,
@@ -52,6 +82,7 @@ data class TeatroCreateRequest(
 )
 
 typealias TeatroUpdateRequest = TeatroCreateRequest
+
 
 // ---------- API ----------
 
@@ -84,13 +115,13 @@ interface ContentApi {
     suspend fun obrasList(): Response<List<ObraDto>>
 
     @POST("content/obras/")
-    suspend fun obrasCreate(@Body body: ObraDto): Response<ObraDto>
+    suspend fun obrasCreate(@Body body: ObraWriteRequest): Response<ObraDto>
 
     @GET("content/obras/{id}/")
     suspend fun obrasRead(@Path("id") id: String): Response<ObraDto>
 
     @PUT("content/obras/{id}/")
-    suspend fun obrasUpdate(@Path("id") id: String, @Body body: ObraDto): Response<ObraDto>
+    suspend fun obrasUpdate(@Path("id") id: String, @Body body: ObraWriteRequest): Response<ObraDto>
 
     @PATCH("content/obras/{id}/")
     suspend fun obrasPartialUpdate(

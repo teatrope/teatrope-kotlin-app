@@ -3,6 +3,7 @@ package com.example.teatrope_kotlin_app.core.network.di
 
 import com.example.teatrope_kotlin_app.BuildConfig
 import com.example.teatrope_kotlin_app.core.network.AuthTokenProvider
+import com.example.teatrope_kotlin_app.core.network.api.ContentApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,6 +13,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -33,6 +35,9 @@ object NetworkModule {
             }
             .build()
     }
+
+    fun provideContentApi(retrofit: Retrofit): ContentApi =
+        retrofit.create(ContentApi::class.java)
 
     @Provides @Singleton
     fun provideRetrofit(okHttp: OkHttpClient): Retrofit =

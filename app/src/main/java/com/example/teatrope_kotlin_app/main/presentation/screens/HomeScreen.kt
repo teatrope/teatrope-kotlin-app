@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import coil.Coil
 import coil.ImageLoader
-import androidx.hilt.navigation.compose.hiltViewModel
+//import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teatrope_kotlin_app.main.presentation.components.DropdownSmall
 import com.example.teatrope_kotlin_app.main.presentation.components.PromoCard
@@ -25,6 +25,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.teatrope_kotlin_app.core.ui.components.ObraCard
+import com.example.teatrope_kotlin_app.content.data.mapper.toUi
+
 
 
 @Composable
@@ -41,6 +45,8 @@ fun HomeScreen(
 
     val obrasVm: ObrasViewModel = hiltViewModel()
     val obrasState = obrasVm.state.collectAsStateWithLifecycle().value
+
+
 
     val ctx = LocalContext.current
     val imageLoader: ImageLoader = Coil.imageLoader(ctx)
@@ -128,11 +134,12 @@ fun HomeScreen(
         when (tab) {
             0 -> ObrasSection(
                 items = obrasState.items,
-                isLoading = obrasState.isLoading,
+                isLoading = obrasState.loading,
                 error = obrasState.error,
                 onOpen = onOpenDetail,
                 onRetry = { obrasVm.refresh() }
             )
+
 
             1 -> TheatersSection(
                 state = theatersState,

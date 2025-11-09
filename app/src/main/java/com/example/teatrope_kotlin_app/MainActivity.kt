@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import com.example.teatrope_kotlin_app.navigation.RootNav
 import com.example.teatrope_kotlin_app.ui.theme.TeatropeTheme
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

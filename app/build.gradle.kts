@@ -90,6 +90,8 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
+
+
     // --- Coil 2.x (¡sin coil-network-okhttp!) ---
     implementation(libs.coil.compose)
     implementation("io.coil-kt:coil-compose:2.6.0")
