@@ -95,6 +95,7 @@ dependencies {
     // --- Coil 2.x (¡sin coil-network-okhttp!) ---
     implementation(libs.coil.compose)
     implementation("io.coil-kt:coil-compose:2.6.0")
+
     // Si quieres el core (no estrictamente necesario con compose):
     // implementation(libs.coil)
     // Formatos extra si los usas:

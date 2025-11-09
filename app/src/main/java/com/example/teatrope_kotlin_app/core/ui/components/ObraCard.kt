@@ -15,6 +15,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import androidx.compose.ui.res.painterResource
 import com.example.teatrope_kotlin_app.R
+import com.example.teatrope_kotlin_app.R.drawable.placeholder
+import com.example.teatrope_kotlin_app.R.drawable.placeholder_error
 import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
 
 @Composable
@@ -37,8 +39,8 @@ fun ObraCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp),
-            placeholder = painterResource(R.drawable.placeholder),
-            error = painterResource(R.drawable.placeholder_error)
+            placeholder = painterResource(placeholder),
+            error = painterResource(placeholder_error)
         )
 
         Column(Modifier.padding(12.dp)) {
