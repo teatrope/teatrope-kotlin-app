@@ -23,11 +23,13 @@ import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.teatrope_kotlin_app.core.ui.components.ObraCard
 import com.example.teatrope_kotlin_app.content.data.mapper.toUi
+import androidx.compose.ui.text.style.TextAlign
 
 
 
@@ -90,12 +92,37 @@ fun HomeScreen(
                 value = search,
                 onValueChange = { search = it },
                 singleLine = true,
-                placeholder = { Text("Search") },
-                leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                placeholder = {
+                    Text(
+                        text = "Search",
+                        fontSize = 14.sp,
+                        color = LocalContentColor.current.copy(alpha = 0.6f),
+                        style = LocalTextStyle.current.copy(
+                            platformStyle = PlatformTextStyle(
+                                includeFontPadding = false
+                            ),
+                            lineHeight = 18.sp
+                        )
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Outlined.Search,
+                        contentDescription = null,
+                        tint = LocalContentColor.current.copy(alpha = 0.7f)
+                    )
+                },
                 shape = MaterialTheme.shapes.medium,
+                textStyle = LocalTextStyle.current.copy(
+                    fontSize = 14.sp,
+                    platformStyle = PlatformTextStyle(
+                        includeFontPadding = false
+                    ),
+                    lineHeight = 18.sp
+                ),
                 modifier = Modifier
                     .weight(1f)
-                    .height(44.dp)
+                    .height(48.dp),
             )
             Surface(
                 shape = MaterialTheme.shapes.medium,
@@ -153,5 +180,3 @@ fun HomeScreen(
 
     }
 }
-
-
