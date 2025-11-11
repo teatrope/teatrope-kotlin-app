@@ -1,4 +1,4 @@
-package com.example.teatrope_kotlin_app.main.presentation.screens
+package com.example.teatrope_kotlin_app.ticket.presentation.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -70,7 +70,7 @@ fun BookingsScreen(
                 )
 
                 is BookingUiState.Reserved -> Text(
-                    text = " Reservation confirmed!",
+                    text = "✅ Reservation confirmed!",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold
                 )

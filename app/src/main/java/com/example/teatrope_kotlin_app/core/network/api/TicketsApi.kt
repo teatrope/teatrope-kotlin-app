@@ -65,4 +65,11 @@ interface TicketsApi {
     suspend fun reservasPartial(@Path("id") id: String, @Body patch: Map<String, Any?>): Response<ReservaDto>
     @DELETE("tickets/reservas/{id}/")
     suspend fun reservasDelete(@Path("id") id: String): Response<Unit>
+
+    // POST flexible para crear reserva sin enviar id
+    @POST("tickets/reservas/")
+    suspend fun reservasCreateRaw(
+        @Body body: Map<String, @JvmSuppressWildcards Any?>
+    ): Response<ReservaDto>
+
 }
