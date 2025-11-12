@@ -22,12 +22,12 @@ import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
 @Composable
 fun ObraCard(
     obra: ObraUi,
-    onClick: (String) -> Unit
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(obra.id) }
+            .clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)

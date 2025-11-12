@@ -9,14 +9,15 @@ import retrofit2.http.*
 
 import retrofit2.http.*
 
+// Corrected mapper function
 fun ObraDto.toUi(): ObraUi = ObraUi(
-    id = id,
-    titulo = titulo,
-    genero = genero,
-    imageUrl = imageUrl.orEmpty(),
-    teatroNombre = teatro.nombre,
+    id = id, // Use the real ID from the DTO
+    titulo = titulo, // Use the real title
+    genero = genero, // Use the real genre
+    imageUrl = imageUrl.orEmpty(), // Use the real image URL
+    teatroNombre = teatro.nombre, // Use the real theater name
     buyUrl = buyUrl.orEmpty(),
-    director = directorNombre.orEmpty()
+    director = directorNombre.orEmpty() // Use the real director's name
 )
 
 // ---------- DTOs ----------

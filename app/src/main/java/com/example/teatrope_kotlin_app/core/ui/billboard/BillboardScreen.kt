@@ -16,7 +16,7 @@ fun BillboardScreen(
             items = obras,
             key = { it.id }
         ) { obra ->
-            ObraCard(obra = obra, onClick = onObraClick)
+            ObraCard(obra = obra, onClick = { onObraClick(obra.id) })
         }
     }
 }

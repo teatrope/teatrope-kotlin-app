@@ -128,7 +128,7 @@ private fun ObrasList(
         ) { obra ->
             ObraCard(
                 obra = obra,
-                onClick = onOpen
+                onClick = { onOpen(obra.id) }
             )
         }
     }

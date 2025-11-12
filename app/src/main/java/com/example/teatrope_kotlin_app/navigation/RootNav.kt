@@ -15,8 +15,8 @@ import com.example.teatrope_kotlin_app.auth.presentation.signin.SignInState
 import com.example.teatrope_kotlin_app.auth.presentation.signin.SignInViewModel
 import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpState
 import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpViewModel
+import com.example.teatrope_kotlin_app.core.ui.detail.ObraDetailRoute
 import com.example.teatrope_kotlin_app.main.presentation.MainScaffold
-import com.example.teatrope_kotlin_app.main.presentation.detail.ShowDetailScreen
 import com.example.teatrope_kotlin_app.main.presentation.notifications.NotificationsScreen
 import com.example.teatrope_kotlin_app.main.presentation.settings.SettingsScreen
 import com.example.teatrope_kotlin_app.main.presentation.theater.TheaterDetailScreen
@@ -174,13 +174,9 @@ fun RootNav(startInMain: Boolean = false) {
             composable(
                 route = Routes.Detail,
                 arguments = listOf(navArgument("showId") { type = NavType.StringType })
-            ) { bs ->
-                val showId = bs.arguments?.getString("showId").orEmpty()
-                ShowDetailScreen(
-                    showId = showId,
-                    onBack = { nav.popBackStack() },
-                    navController = nav
-                )
+            ) { backStackEntry ->
+                val showId = backStackEntry.arguments?.getString("showId")!!
+                ObraDetailRoute(obraId = showId)
             }
 
             composable(

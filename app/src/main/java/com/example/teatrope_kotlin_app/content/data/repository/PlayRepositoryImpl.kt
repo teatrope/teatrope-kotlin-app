@@ -4,7 +4,7 @@ import com.example.teatrope_kotlin_app.core.network.api.ContentApi
 import com.example.teatrope_kotlin_app.core.network.api.ObraWriteRequest
 import com.example.teatrope_kotlin_app.content.data.mapper.toDomain
 import com.example.teatrope_kotlin_app.domain.model.Play
-import com.example.teatrope_kotlin_app.domain.repository.PlayRepository
+import com.example.teatrope_kotlin_app.content.data.repository.PlayRepository
 import javax.inject.Inject
 
 class PlayRepositoryImpl @Inject constructor (
@@ -19,6 +19,12 @@ class PlayRepositoryImpl @Inject constructor (
 
     override suspend fun createPlay(req: ObraWriteRequest): Play {
         val resp = api.obrasCreate(req)
+        if (!resp.isSuccessful) error("HTTP ${resp.code()}")
+        return requireNotNull(resp.body()).toDomain()
+    }
+
+    override suspend fun getPlay(id: String): Play {
+        val resp = api.obrasRead(id)
         if (!resp.isSuccessful) error("HTTP ${resp.code()}")
         return requireNotNull(resp.body()).toDomain()
     }
