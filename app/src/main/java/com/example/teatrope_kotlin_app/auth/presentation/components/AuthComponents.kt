@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material3.*
@@ -21,7 +22,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -87,8 +87,10 @@ fun FilledField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    isPassword: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     TextField(
         value = value,
@@ -96,13 +98,15 @@ fun FilledField(
         textStyle = TextStyle(color = TextPrimary, fontSize = 14.sp),
         singleLine = true,
         placeholder = { Text(placeholder, color = TextSecondary) },
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = visualTransformation,
+        keyboardOptions = keyboardOptions,
+        trailingIcon = trailingIcon,
         colors = TextFieldDefaults.colors(
             focusedContainerColor = FieldFill,
             unfocusedContainerColor = FieldFill,
             disabledContainerColor = FieldFill,
-            focusedIndicatorColor = FieldStroke,
-            unfocusedIndicatorColor = FieldStroke,
+            focusedIndicatorColor = Color.Transparent, // Remove indicator
+            unfocusedIndicatorColor = Color.Transparent, // Remove indicator
             cursorColor = AccentRed,
             focusedTextColor = TextPrimary,
             unfocusedTextColor = TextPrimary,
@@ -110,9 +114,7 @@ fun FilledField(
             unfocusedPlaceholderColor = TextSecondary
         ),
         shape = RoundedCornerShape(12.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .height(44.dp)
+        modifier = modifier.fillMaxWidth()
     )
 }
 

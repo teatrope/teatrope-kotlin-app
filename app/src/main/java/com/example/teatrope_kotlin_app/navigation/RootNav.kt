@@ -9,6 +9,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.teatrope_kotlin_app.auth.presentation.forgot.ForgotPasswordScreen
 import com.example.teatrope_kotlin_app.auth.presentation.signin.SignInScreen
 import com.example.teatrope_kotlin_app.auth.presentation.signup.SignUpScreen
 import com.example.teatrope_kotlin_app.auth.presentation.signin.SignInState
@@ -31,6 +32,7 @@ object Graph {
 object Routes {
     const val SignIn = "signin"
     const val SignUp = "signup"
+    const val ForgotPassword = "forgot_password"
     const val Home = "home"
     const val ComingSoon = "comingsoon"
     const val Favorites = "favorites"
@@ -60,7 +62,7 @@ fun RootNav(startInMain: Boolean = false) {
                 val state by vm.state.collectAsStateWithLifecycle()
 
                 SignInScreen(
-                    onForgotPassword = { /* TODO */ },
+                    onForgotPassword = { nav.navigate(Routes.ForgotPassword) },
                     onSignIn = { email, password, _ ->
                         vm.signIn(email.trim(), password)
                     },
@@ -110,6 +112,10 @@ fun RootNav(startInMain: Boolean = false) {
                         vm.resetToIdle()
                     }
                 }
+            }
+            
+            composable(Routes.ForgotPassword) {
+                ForgotPasswordScreen(onBack = { nav.popBackStack() })
             }
         }
 
