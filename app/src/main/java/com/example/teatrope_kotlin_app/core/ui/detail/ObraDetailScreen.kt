@@ -36,6 +36,10 @@ import com.example.teatrope_kotlin_app.R
 import com.example.teatrope_kotlin_app.content.presentation.funciones.FuncionUi
 import com.example.teatrope_kotlin_app.content.presentation.personas.PersonaUi
 import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @Composable
 fun ObraDetailScreen(
@@ -197,15 +201,26 @@ private fun FuncionesSection(funciones: List<FuncionUi>) {
         if (funciones.isEmpty()) {
             Text("No hay funciones disponibles.", color = Color.White.copy(alpha = 0.7f))
         } else {
+            val inputFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val outputFormatter = SimpleDateFormat("dd MMM yyyy HH:mm", Locale("es", "ES"))
+            outputFormatter.timeZone = TimeZone.getTimeZone("America/Lima")
+
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 funciones.forEach { funcion ->
+                    val date: Date? = try {
+                        inputFormatter.parse(funcion.fecha)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    val formattedDateTime = date?.let { outputFormatter.format(it) } ?: "Fecha inválida"
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text(text = funcion.fecha, color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(text = formattedDateTime, color = Color.White, fontWeight = FontWeight.Bold)
                             Text(text = funcion.disponibilidad, color = Color.White.copy(alpha = 0.7f))
                         }
                         Button(
