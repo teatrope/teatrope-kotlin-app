@@ -23,7 +23,6 @@ import com.example.teatrope_kotlin_app.main.presentation.settings.SettingsScreen
 import com.example.teatrope_kotlin_app.main.presentation.theater.TheaterDetailScreen
 import com.example.teatrope_kotlin_app.main.presentation.screens.BookingsScreen
 
-
 object Graph {
     const val AUTH = "auth_graph"
     const val MAIN = "main_graph"
@@ -113,7 +112,7 @@ fun RootNav(startInMain: Boolean = false) {
                     }
                 }
             }
-            
+
             composable(Routes.ForgotPassword) {
                 ForgotPasswordScreen(onBack = { nav.popBackStack() })
             }
@@ -188,9 +187,8 @@ fun RootNav(startInMain: Boolean = false) {
             composable(
                 route = Routes.TheaterDetail,
                 arguments = listOf(navArgument("theaterId") { type = NavType.StringType })
-            ) { bs ->
+            ) {
                 TheaterDetailScreen(
-                    theaterId = bs.arguments?.getString("theaterId").orEmpty(),
                     onBack = { nav.popBackStack() },
                     onOpenShow = { id -> nav.navigate("detail/$id") }
                 )
