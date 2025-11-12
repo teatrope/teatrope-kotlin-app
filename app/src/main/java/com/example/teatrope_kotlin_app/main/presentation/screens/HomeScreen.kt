@@ -96,11 +96,12 @@ fun HomeScreen(
                 ) {
                     Icon(Icons.Outlined.Search, contentDescription = "Search", tint = Color.White)
                 }
-                Surface(
+                /*Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = Color.White.copy(alpha = 0.1f),
                     modifier = Modifier.size(56.dp)
                 ) {}
+                 */
             }
         }
 
