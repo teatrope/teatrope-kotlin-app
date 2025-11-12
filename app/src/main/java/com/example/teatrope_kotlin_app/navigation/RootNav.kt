@@ -63,8 +63,8 @@ fun RootNav(startInMain: Boolean = false) {
 
                 SignInScreen(
                     onForgotPassword = { nav.navigate(Routes.ForgotPassword) },
-                    onSignIn = { email, password, _ ->
-                        vm.signIn(email.trim(), password)
+                    onSignIn = { email, password, remember ->
+                        vm.signIn(email.trim(), password, remember)
                     },
                     onGoToSignUp = {
                         nav.navigate(Routes.SignUp) {
