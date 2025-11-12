@@ -176,7 +176,7 @@ fun RootNav(startInMain: Boolean = false) {
                 arguments = listOf(navArgument("showId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val showId = backStackEntry.arguments?.getString("showId")!!
-                ObraDetailRoute(obraId = showId)
+                ObraDetailRoute(obraId = showId, onBack = { nav.popBackStack() })
             }
 
             composable(

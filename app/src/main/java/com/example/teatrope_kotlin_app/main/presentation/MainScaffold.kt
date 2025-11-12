@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.ViewCarousel
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.teatrope_kotlin_app.main.presentation.screens.*
@@ -40,6 +41,7 @@ fun MainScaffold(
     }
 
     Scaffold(
+        containerColor = Color.Transparent, // Make Scaffold background transparent
         bottomBar = {
             NavigationBar {
                 tabs.forEach { item ->

@@ -66,6 +66,7 @@ fun HomeScreen(
                     listOf(Color(0xFF0E121A), Color(0xFF0B0E15))
                 )
             )
+            .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         // Header

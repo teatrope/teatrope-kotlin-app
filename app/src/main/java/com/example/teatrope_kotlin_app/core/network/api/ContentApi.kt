@@ -5,10 +5,6 @@ import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.*
 
-
-
-import retrofit2.http.*
-
 // Corrected mapper function
 fun ObraDto.toUi(): ObraUi = ObraUi(
     id = id, // Use the real ID from the DTO
@@ -23,24 +19,22 @@ fun ObraDto.toUi(): ObraUi = ObraUi(
 // ---------- DTOs ----------
 data class FuncionDto(
     @SerializedName("id") val id: String,
-    @SerializedName("obra_id") val obraId: String?,
-    @SerializedName("fecha") val fecha: String?,
-    @SerializedName("hora") val hora: String?,
-    @SerializedName("teatro_id") val teatroId: String?
+    @SerializedName("obra") val obra: ObraDto,
+    @SerializedName("fecha") val fecha: String,
+    @SerializedName("duracion_minutos") val duracionMinutos: Int,
+    @SerializedName("disponibilidad_asientos") val disponibilidadAsientos: Int
 )
-
 
 data class TeatroDto(
     @SerializedName("id") val id: String,
     @SerializedName("nombre") val nombre: String = "",
     @SerializedName("descripcion") val descripcion: String? = null,
-    @SerializedName("calle") val calle: String? = null,        //
+    @SerializedName("calle") val calle: String? = null,
     @SerializedName("distrito") val distrito: String? = null,
     @SerializedName("latitud") val latitud: Double? = null,
     @SerializedName("longitud") val longitud: Double? = null,
-    @SerializedName("image_url") val imageUrl: String? = null  //
+    @SerializedName("image_url") val imageUrl: String? = null
 )
-
 
 data class ObraDto(
     @SerializedName("id") val id: String,
@@ -52,7 +46,6 @@ data class ObraDto(
     @SerializedName("image_url") val imageUrl: String? = null,
     @SerializedName("buy_url") val buyUrl: String? = null
 )
-
 
 data class ObraWriteRequest(
     @SerializedName("teatro") val teatroId: String,
@@ -66,8 +59,10 @@ data class ObraWriteRequest(
 
 data class PersonaDto(
     @SerializedName("id") val id: String,
-    @SerializedName("nombre") val nombre: String,
-    @SerializedName("rol") val rol: String? = null
+    @SerializedName("obra") val obra: ObraDto,
+    @SerializedName("nombre_completo") val nombreCompleto: String,
+    @SerializedName("rol") val rol: String,
+    @SerializedName("image_url") val imageUrl: String? = null
 )
 
 
@@ -88,6 +83,10 @@ typealias TeatroUpdateRequest = TeatroCreateRequest
 // ---------- API ----------
 
 interface ContentApi {
+
+    // Personas
+    @GET("content/personas/")
+    suspend fun personasList(): Response<List<PersonaDto>>
 
     // Funciones
     @GET("content/funciones/")

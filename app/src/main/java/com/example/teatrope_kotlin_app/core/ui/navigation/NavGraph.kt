@@ -33,7 +33,10 @@ fun NavGraph(
             arguments = listOf(navArgument("obraId") { type = NavType.StringType })
         ) { backStackEntry ->
             val obraId = backStackEntry.arguments?.getString("obraId")!!
-            ObraDetailRoute(obraId = obraId)
+            ObraDetailRoute(
+                obraId = obraId,
+                onBack = { navController.popBackStack() } // Pass the onBack lambda
+            )
         }
     }
 }

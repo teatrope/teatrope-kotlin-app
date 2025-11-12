@@ -9,6 +9,7 @@ import com.example.teatrope_kotlin_app.presentation.theater.ObrasViewModel
 @Composable
 fun ObraDetailRoute(
     obraId: String,
+    onBack: () -> Unit,
     obrasVm: ObrasViewModel = hiltViewModel()
 ) {
 
@@ -19,8 +20,13 @@ fun ObraDetailRoute(
     val state = obrasVm.state.collectAsStateWithLifecycle().value
 
     when {
-        state.loadingDetail -> ObraDetailLoading()
-        state.obraDetail != null -> ObraDetailScreen(obra = state.obraDetail)
+        state.loadingDetail || state.loadingFunciones || state.loadingReparto -> ObraDetailLoading()
+        state.obraDetail != null -> ObraDetailScreen(
+            obra = state.obraDetail,
+            funciones = state.funciones,
+            reparto = state.reparto,
+            onBack = onBack
+        )
         state.error != null -> ObraDetailError(msg = state.error) { obrasVm.loadObraById(obraId) }
     }
 }

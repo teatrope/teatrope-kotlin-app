@@ -1,14 +1,17 @@
 package com.example.teatrope_kotlin_app.core.ui.detail
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
@@ -23,71 +26,35 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.teatrope_kotlin_app.R
+import com.example.teatrope_kotlin_app.content.presentation.funciones.FuncionUi
+import com.example.teatrope_kotlin_app.content.presentation.personas.PersonaUi
 import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
 
 @Composable
-fun ObraDetailScreen(obra: ObraUi, modifier: Modifier = Modifier, onBack: () -> Unit = {}) {
-    // Datos de ejemplo para el nuevo diseño. Más adelante los conectaremos a la API.
+fun ObraDetailScreen(
+    obra: ObraUi,
+    funciones: List<FuncionUi>,
+    reparto: List<PersonaUi>,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {}
+) {
     val rating = 4.7
-    val description = "A sharp yet heartwarming comedy about fame, friendship, and second chances. Inspired by (almost) true events, this story follows two struggling actors who must..."
-    val cast = listOf("", "", "", "", "") // Placeholder para las imágenes del reparto
 
     Box(modifier = modifier.fillMaxSize().background(Color(0xFF0E121A))) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 120.dp) // Espacio para los botones flotantes
+            contentPadding = PaddingValues(bottom = 120.dp)
         ) {
-            // --- Imagen Principal con Botones Superpuestos ---
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(350.dp)
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current).data(obra.imageUrl).crossfade(true).build(),
-                        contentDescription = obra.titulo,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                        placeholder = painterResource(R.drawable.placeholder),
-                        error = painterResource(R.drawable.placeholder_error)
-                    )
-                    // Botón de Volver
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(16.dp)
-                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
-                    }
-                    // Chip de Calificación
-                    Card(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.5f))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Default.Star, contentDescription = "Calificación", tint = Color(0xFFFFC107))
-                            Spacer(Modifier.width(4.dp))
-                            Text(text = rating.toString(), color = Color.White, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
+                HeaderSection(obra, rating, onBack)
             }
 
-            // --- Contenido Principal ---
             item {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -95,103 +62,217 @@ fun ObraDetailScreen(obra: ObraUi, modifier: Modifier = Modifier, onBack: () -> 
                         style = MaterialTheme.typography.headlineLarge.copy(color = Color(0xFFEF4444), fontWeight = FontWeight.Bold)
                     )
                     Spacer(Modifier.height(16.dp))
+                    GenreChips(obra.genero)
+                    Spacer(Modifier.height(24.dp))
+                    CastSection(reparto)
+                    Spacer(Modifier.height(24.dp))
+                    LocationSection(obra.teatroNombre)
+                    Spacer(Modifier.height(16.dp))
+                    FuncionesSection(funciones)
+                    Spacer(Modifier.height(24.dp))
+                    UserRatingSection()
+                }
+            }
+        }
 
-                    // Chips de Género
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.DarkGray.copy(alpha=0.3f))) {
-                            Text(text = obra.genero, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), color = Color.White.copy(alpha=0.8f))
+        FloatingActionButtons(obra.buyUrl)
+    }
+}
+
+@Composable
+private fun HeaderSection(obra: ObraUi, rating: Double, onBack: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(350.dp)
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current).data(obra.imageUrl).crossfade(true).build(),
+            contentDescription = obra.titulo,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+            placeholder = painterResource(R.drawable.placeholder),
+            error = painterResource(R.drawable.placeholder_error)
+        )
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(16.dp)
+                .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
+        }
+        Card(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(16.dp),
+            shape = RoundedCornerShape(8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.5f))
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.Star, contentDescription = "Calificación", tint = Color(0xFFFFC107))
+                Spacer(Modifier.width(4.dp))
+                Text(text = rating.toString(), color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun GenreChips(genero: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.DarkGray.copy(alpha=0.3f))) {
+            Text(text = genero, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), color = Color.White.copy(alpha=0.8f))
+        }
+    }
+}
+
+@Composable
+private fun CastSection(reparto: List<PersonaUi>) {
+    Column {
+        Text("Reparto", style = MaterialTheme.typography.titleMedium, color = Color.White)
+        Spacer(Modifier.height(12.dp))
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(reparto) { persona ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(80.dp)) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current).data(persona.imageUrl).crossfade(true).build(),
+                        contentDescription = persona.nombreCompleto,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape),
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.placeholder_error)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = persona.nombreCompleto, 
+                        color = Color.White, 
+                        fontSize = 12.sp, 
+                        maxLines = 2, 
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = persona.rol, 
+                        color = Color.White.copy(alpha = 0.7f), 
+                        fontSize = 10.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LocationSection(teatroNombre: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Default.LocationOn, contentDescription = "Ubicación", tint = Color(0xFFEF4444), modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(text = teatroNombre, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
+    }
+}
+
+@Composable
+private fun FuncionesSection(funciones: List<FuncionUi>) {
+    val context = LocalContext.current
+    Column {
+        Text("Funciones", style = MaterialTheme.typography.titleMedium, color = Color.White)
+        Spacer(Modifier.height(12.dp))
+        if (funciones.isEmpty()) {
+            Text("No hay funciones disponibles.", color = Color.White.copy(alpha = 0.7f))
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                funciones.forEach { funcion ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(text = funcion.fecha, color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(text = funcion.disponibilidad, color = Color.White.copy(alpha = 0.7f))
                         }
-                    }
-
-                    Spacer(Modifier.height(24.dp))
-
-                    // Reparto
-                    Text("Reparto", style = MaterialTheme.typography.titleMedium, color = Color.White)
-                    Spacer(Modifier.height(12.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(cast.size) { // Usamos el placeholder
-                            Box(
-                                modifier = Modifier
-                                    .size(60.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Gray)
-                            )
-                        }
-                    }
-
-                    Spacer(Modifier.height(24.dp))
-
-                    // Descripción
-                    Text(text = description, style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.8f))
-
-                    Spacer(Modifier.height(24.dp))
-
-                    // Teatro y Horarios
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.LocationOn, contentDescription = "Ubicación", tint = Color(0xFFEF4444), modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(text = obra.teatroNombre, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        // Horarios de ejemplo
-                        Text("Jueves, viernes, sábado: 08:00pm", color = Color.White.copy(alpha = 0.7f), modifier = Modifier.padding(start = 24.dp))
-                        Text("Domingo: 07:00pm", color = Color.White.copy(alpha = 0.7f), modifier = Modifier.padding(start = 24.dp))
-                    }
-
-                    Spacer(Modifier.height(24.dp))
-
-                    // Calificación del Usuario
-                    Text("¿Ya la viste?", style = MaterialTheme.typography.titleMedium, color = Color.White)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        (1..5).forEach { index ->
-                            Icon(
-                                Icons.Default.Star,
-                                contentDescription = null,
-                                tint = if (index <= 4) Color(0xFFFFC107) else Color.Gray, // Calificación de ejemplo
-                                modifier = Modifier.size(32.dp)
-                            )
+                        Button(
+                            onClick = { 
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(funcion.buyUrl))
+                                context.startActivity(intent)
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444).copy(alpha = 0.2f))
+                        ) {
+                            Text("Comprar", color = Color(0xFFEF4444))
                         }
                     }
                 }
             }
         }
+    }
+}
 
-        // --- Botones Flotantes de Acción ---
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = { /* TODO: Navegar a la pantalla de Booking */ },
-                modifier = Modifier.weight(1f).height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
-            ) {
-                Text("Booking", fontSize = 18.sp)
-                Spacer(Modifier.width(8.dp))
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
-            }
-
-            var isFavorite by remember { mutableStateOf(false) }
-            IconButton(
-                onClick = { isFavorite = !isFavorite },
-                modifier = Modifier.size(56.dp).background(Color(0x33FFFFFF), CircleShape)
-            ) {
-                Icon(
-                    if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Añadir a favoritos",
-                    tint = Color(0xFFEF4444),
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+@Composable
+private fun UserRatingSection() {
+    Text("¿Ya la viste?", style = MaterialTheme.typography.titleMedium, color = Color.White)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        (1..5).forEach { index ->
+            Icon(
+                Icons.Default.Star,
+                contentDescription = null,
+                tint = if (index <= 4) Color(0xFFFFC107) else Color.Gray, // Calificación de ejemplo
+                modifier = Modifier.size(32.dp)
+            )
         }
     }
 }
+
+@Composable
+private fun BoxScope.FloatingActionButtons(buyUrl: String) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .navigationBarsPadding()
+            .padding(16.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+         var isFavorite by remember { mutableStateOf(false) }
+        OutlinedButton(
+             onClick = { isFavorite = !isFavorite },
+             modifier = Modifier.size(56.dp),
+             shape = CircleShape,
+             border = BorderStroke(1.dp, Color(0xFFEF4444)),
+             contentPadding = PaddingValues(0.dp)
+        ) {
+             Icon(
+                 if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                 contentDescription = "Añadir a favoritos",
+                 tint = Color(0xFFEF4444),
+                 modifier = Modifier.size(28.dp)
+             )
+        }
+
+        Button(
+            onClick = { 
+                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(buyUrl))
+                 context.startActivity(intent)
+             },
+            modifier = Modifier.weight(1f).height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+        ) {
+            Text("Comprar Entradas", fontSize = 18.sp)
+        }
+    }
+}
+
 
 @Composable fun ObraDetailLoading() { Text("Cargando…", modifier = Modifier.padding(16.dp)) }
 @Composable fun ObraDetailError(msg: String?, onRetry: () -> Unit) { Text("Error: ${msg ?: ""}") }
