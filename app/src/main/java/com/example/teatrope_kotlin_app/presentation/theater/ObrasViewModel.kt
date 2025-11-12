@@ -23,19 +23,32 @@ class ObrasViewModel @Inject constructor(
 ) : ViewModel() {
 
     data class UiState(
-        // State for the list of plays
-        val items: List<ObraUi> = emptyList(),
+
+        private val allItems: List<ObraUi> = emptyList(),
         val loading: Boolean = false,
         val error: String? = null,
 
-        // State for the detail view
+
+        val selectedGenre: String = "All",
+        val selectedDistrict: String = "All",
+
+
         val obraDetail: ObraUi? = null,
         val loadingDetail: Boolean = false,
         val funciones: List<FuncionUi> = emptyList(),
         val loadingFunciones: Boolean = false,
         val reparto: List<PersonaUi> = emptyList(),
         val loadingReparto: Boolean = false
-    )
+    ) {
+        val genres: List<String> = listOf("All") + allItems.map { it.genero }.distinct()
+        val districts: List<String> = listOf("All") + allItems.map { it.distrito }.distinct()
+
+
+        val items: List<ObraUi> = allItems.filter { obra ->
+            (selectedGenre == "All" || obra.genero == selectedGenre) &&
+            (selectedDistrict == "All" || obra.distrito == selectedDistrict)
+        }
+    }
 
     private val _state = MutableStateFlow(UiState(loading = true))
     val state: StateFlow<UiState> = _state.asStateFlow()
@@ -44,13 +57,21 @@ class ObrasViewModel @Inject constructor(
         load()
     }
 
+    fun setGenre(genre: String) {
+        _state.update { it.copy(selectedGenre = genre) }
+    }
+
+    fun setDistrict(district: String) {
+        _state.update { it.copy(selectedDistrict = district) }
+    }
+
     fun load() = viewModelScope.launch {
         _state.update { it.copy(loading = true, error = null) }
 
         runCatching { repo.getPlays() }
             .onSuccess { plays ->
-                val ui = plays.map { it.toUi() }   // <- mapper Play -> ObraUi
-                _state.update { it.copy(loading = false, items = ui) }
+                val ui = plays.map { it.toUi() }
+                _state.update { it.copy(loading = false, allItems = ui) }
             }
             .onFailure { t ->
                 _state.update {
@@ -62,7 +83,7 @@ class ObrasViewModel @Inject constructor(
     fun loadObraById(id: String) = viewModelScope.launch {
         _state.update { it.copy(loadingDetail = true, loadingFunciones = true, loadingReparto = true, error = null) }
 
-        // Load play details
+
         runCatching {
             repo.getPlay(id)
         }.onSuccess { play ->
@@ -75,7 +96,7 @@ class ObrasViewModel @Inject constructor(
             }
         }
 
-        // Load and filter functions
+
         runCatching {
             repo.getFunciones()
         }.onSuccess { funcionesDto ->
@@ -91,7 +112,7 @@ class ObrasViewModel @Inject constructor(
             }
         }
 
-        // Load and filter personas
+
         runCatching {
             repo.getPersonas()
         }.onSuccess { personasDto ->

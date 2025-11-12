@@ -21,6 +21,6 @@ class MainViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = false // Start with login screen by default
+            initialValue = false
         )
 }

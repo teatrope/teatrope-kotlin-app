@@ -22,7 +22,8 @@ fun Play.toUi(): ObraUi = ObraUi(
     titulo = title.orEmpty(),
     genero = genre.orEmpty(),
     imageUrl = imageUrl.orEmpty(),
-    teatroNombre = theater.nombre.orEmpty(),  // NO 'name', usa 'nombre'
+    teatroNombre = theater.nombre.orEmpty(),
+    distrito = theater.distrito.orEmpty(),
     buyUrl = buyUrl.orEmpty(),
     director = directorName.orEmpty()
 )

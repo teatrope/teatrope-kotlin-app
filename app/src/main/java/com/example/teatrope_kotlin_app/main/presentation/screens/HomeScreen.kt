@@ -5,17 +5,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import coil.Coil
 import coil.ImageLoader
-//import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.teatrope_kotlin_app.main.presentation.components.DropdownSmall
+import com.example.teatrope_kotlin_app.main.presentation.components.CityDropdown
+import com.example.teatrope_kotlin_app.main.presentation.components.FilterDropdown
 import com.example.teatrope_kotlin_app.main.presentation.components.PromoCard
-import com.example.teatrope_kotlin_app.main.presentation.components.Segmented
 import com.example.teatrope_kotlin_app.main.presentation.theater.TheatersSection
 import com.example.teatrope_kotlin_app.presentation.theater.ObrasSection
 import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListViewModel
 import com.example.teatrope_kotlin_app.presentation.theater.ObrasViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
@@ -23,14 +23,11 @@ import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.teatrope_kotlin_app.core.ui.components.ObraCard
-import com.example.teatrope_kotlin_app.content.data.mapper.toUi
-import androidx.compose.ui.text.style.TextAlign
-
+import com.example.teatrope_kotlin_app.ui.theme.AccentRed
 
 
 @Composable
@@ -41,22 +38,17 @@ fun HomeScreen(
     onOpenTheatersList: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    // ViewModels reales
     val theatersVm: TheaterListViewModel = hiltViewModel()
     val theatersState = theatersVm.state.collectAsStateWithLifecycle().value
 
     val obrasVm: ObrasViewModel = hiltViewModel()
-    val obrasState = obrasVm.state.collectAsStateWithLifecycle().value
-
-
+    val obrasState by obrasVm.state.collectAsStateWithLifecycle()
 
     val ctx = LocalContext.current
     val imageLoader: ImageLoader = Coil.imageLoader(ctx)
 
-    var tab by remember { mutableStateOf(1) } // 0=Services(Obras), 1=Theaters
+    var tab by remember { mutableStateOf(0) } // 0=Services(Obras), 1=Theaters
     var city by remember { mutableStateOf("Lima") }
-    var second by remember { mutableStateOf("Surco") }
-    var search by remember { mutableStateOf("") }
 
     Column(
         modifier
@@ -75,90 +67,101 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("teatrope", color = Color(0xFFEF4444), fontSize = 28.sp)
+            Text("teatrope", color = Color(0xFFEF4444), fontSize = 28.sp, fontWeight = FontWeight.Bold)
             IconButton(onClick = onOpenNotifications) {
-                Icon(Icons.Outlined.Notifications, contentDescription = null)
+                Icon(Icons.Outlined.Notifications, contentDescription = null, tint = Color.White)
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(20.dp))
 
-        // Filtros + buscador
+        // --- Top Filter Bar ---
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            DropdownSmall(label = "City", value = city, onClick = { /* TODO picker */ })
-            OutlinedTextField(
-                value = search,
-                onValueChange = { search = it },
-                singleLine = true,
-                placeholder = {
-                    Text(
-                        text = "Search",
-                        fontSize = 14.sp,
-                        color = LocalContentColor.current.copy(alpha = 0.6f),
-                        style = LocalTextStyle.current.copy(
-                            platformStyle = PlatformTextStyle(
-                                includeFontPadding = false
-                            ),
-                            lineHeight = 18.sp
-                        )
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        Icons.Outlined.Search,
-                        contentDescription = null,
-                        tint = LocalContentColor.current.copy(alpha = 0.7f)
-                    )
-                },
-                shape = MaterialTheme.shapes.medium,
-                textStyle = LocalTextStyle.current.copy(
-                    fontSize = 14.sp,
-                    platformStyle = PlatformTextStyle(
-                        includeFontPadding = false
-                    ),
-                    lineHeight = 18.sp
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
+            CityDropdown(
+                label = "Choose city",
+                value = city,
+                onClick = { /* TODO: City Picker */ }
             )
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                color = Color(0x18FFFFFF),
-                modifier = Modifier.size(44.dp)
-            ) {}
+            Spacer(Modifier.weight(1f)) // This will push the icons to the right
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)){
+                Button(
+                    onClick = { /* TODO: Search Action */ },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentRed),
+                    modifier = Modifier.size(56.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(Icons.Outlined.Search, contentDescription = "Search", tint = Color.White)
+                }
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.1f),
+                    modifier = Modifier.size(56.dp)
+                ) {}
+            }
         }
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(20.dp))
 
-        PromoCard(
-            title = "Know the promotions of\nTuesdays & Monday",
-            cta = "Go",
-            onClick = { /* TODO promos */ }
-        )
+        PromoCard(onClick = { /* TODO promos */ })
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(20.dp))
 
-        Segmented(
-            options = listOf("Services", "Theaters"),
-            selectedIndex = tab,
-            onSelect = { tab = it }
-        )
-
-        Spacer(Modifier.height(14.dp))
-
+        // --- Tab Buttons ---
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            DropdownSmall("City", city, onClick = { /* TODO */ })
-            DropdownSmall(if (tab == 0) "Genre" else "District", second, onClick = { /* TODO */ })
+            val servicesSelected = tab == 0
+            Button(
+                onClick = { tab = 0 },
+                modifier = Modifier.weight(1f).height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (servicesSelected) AccentRed else Color.White.copy(alpha = 0.1f),
+                    contentColor = if (servicesSelected) Color.White else Color.White.copy(alpha = 0.8f)
+                )
+            ) {
+                Text("Services", fontWeight = FontWeight.SemiBold)
+            }
+
+            val theatersSelected = tab == 1
+            Button(
+                onClick = { tab = 1 },
+                modifier = Modifier.weight(1f).height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (theatersSelected) AccentRed else Color.White.copy(alpha = 0.1f),
+                    contentColor = if (theatersSelected) Color.White else Color.White.copy(alpha = 0.8f)
+                )
+            ) {
+                Text("Theaters", fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+        Spacer(Modifier.height(20.dp))
+
+        // --- Bottom Filter Buttons ---
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            FilterDropdown(
+                label = "District",
+                value = obrasState.selectedDistrict,
+                options = obrasState.districts,
+                onSelect = { obrasVm.setDistrict(it) },
+                modifier = Modifier.weight(1f)
+            )
+            FilterDropdown(
+                label = "Genre",
+                value = obrasState.selectedGenre,
+                options = obrasState.genres,
+                onSelect = { obrasVm.setGenre(it) },
+                modifier = Modifier.weight(1f)
+            )
         }
 
         Spacer(Modifier.height(18.dp))
 
         // Secciones
-
         when (tab) {
             0 -> ObrasSection(
                 items = obrasState.items,
@@ -168,7 +171,6 @@ fun HomeScreen(
                 onRetry = { obrasVm.refresh() }
             )
 
-
             1 -> TheatersSection(
                 state = theatersState,
                 imageLoader = imageLoader,
@@ -177,7 +179,5 @@ fun HomeScreen(
                 onOpenTheatersList = onOpenTheatersList
             )
         }
-
-
     }
 }
