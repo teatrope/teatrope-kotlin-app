@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -138,31 +139,39 @@ private fun CastSection(reparto: List<PersonaUi>) {
     Column {
         Text("Reparto", style = MaterialTheme.typography.titleMedium, color = Color.White)
         Spacer(Modifier.height(12.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
             items(reparto) { persona ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(80.dp)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.width(100.dp)
+                ) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current).data(persona.imageUrl).crossfade(true).build(),
                         contentDescription = persona.nombreCompleto,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(100.dp)
                             .clip(CircleShape),
                         placeholder = painterResource(R.drawable.placeholder),
                         error = painterResource(R.drawable.placeholder_error)
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(10.dp))
                     Text(
-                        text = persona.nombreCompleto, 
-                        color = Color.White, 
-                        fontSize = 12.sp, 
-                        maxLines = 2, 
-                        overflow = TextOverflow.Ellipsis
+                        text = persona.nombreCompleto,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
                     )
                     Text(
-                        text = persona.rol, 
-                        color = Color.White.copy(alpha = 0.7f), 
-                        fontSize = 10.sp
+                        text = persona.rol,
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 12.sp
                     )
                 }
             }
@@ -218,15 +227,20 @@ private fun FuncionesSection(funciones: List<FuncionUi>) {
 
 @Composable
 private fun UserRatingSection() {
-    Text("¿Ya la viste?", style = MaterialTheme.typography.titleMedium, color = Color.White)
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        (1..5).forEach { index ->
-            Icon(
-                Icons.Default.Star,
-                contentDescription = null,
-                tint = if (index <= 4) Color(0xFFFFC107) else Color.Gray, // Calificación de ejemplo
-                modifier = Modifier.size(32.dp)
-            )
+    var userRating by remember { mutableStateOf(0) }
+    Column {
+        Text("¿Ya la viste?", style = MaterialTheme.typography.titleMedium, color = Color.White)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            (1..5).forEach { index ->
+                IconButton(onClick = { userRating = index }) {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = null,
+                        tint = if (index <= userRating) Color(0xFFFFC107) else Color.Gray,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
         }
     }
 }
