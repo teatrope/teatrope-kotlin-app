@@ -3,16 +3,17 @@ package com.example.teatrope_kotlin_app.auth.presentation.signin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teatrope_kotlin_app.auth.data.AuthRepository
+import com.example.teatrope_kotlin_app.data.preferences.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val repo: AuthRepository
+    private val repo: AuthRepository,
+    private val prefs: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<SignInState>(SignInState.Idle)
@@ -24,7 +25,7 @@ class SignInViewModel @Inject constructor(
         _state.value = SignInState.Idle
     }
 
-    fun signIn(email: String, password: String) {
+    fun signIn(email: String, password: String, remember: Boolean) {
         val e = email.trim()
         val p = password
 
@@ -37,8 +38,13 @@ class SignInViewModel @Inject constructor(
             if (!gate.tryLock()) return@launch
             try {
                 _state.value = SignInState.Loading
-                val r = repo.login(e, p)
-                _state.value = r.fold(
+                val result = repo.login(e, p)
+                
+                if (result.isSuccess) {
+                    prefs.setRememberMe(remember)
+                }
+
+                _state.value = result.fold(
                     onSuccess = { SignInState.Success },
                     onFailure = { SignInState.Error(it.message ?: "Error de inicio de sesión") }
                 )
