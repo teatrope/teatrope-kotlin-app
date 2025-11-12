@@ -1,6 +1,5 @@
 package com.example.teatrope_kotlin_app.content.presentation.theaters
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,13 +18,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.Coil
 import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.imageLoader
 import coil.request.ImageRequest
 import com.example.teatrope_kotlin_app.R
-import com.example.teatrope_kotlin_app.core.network.api.TeatroDto
-import com.example.teatrope_kotlin_app.core.ui.thumbUrl
 
 @Composable
 fun TheaterListScreen(
@@ -58,26 +55,27 @@ fun TheaterListScreen(
 
 @Composable
 private fun TheaterRow(
-    item: TeatroDto,
+    item: TheaterUi, // <-- THE FIX IS HERE
     onClick: () -> Unit
 ) {
     val ctx = LocalContext.current
-    val imageLoader: ImageLoader = Coil.imageLoader(ctx)
+    val imageLoader: ImageLoader = LocalContext.current.imageLoader
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
             model = ImageRequest.Builder(ctx)
-                .data(item.thumbUrl)
+                .data(item.imageUrl) // Use imageUrl from TheaterUi
                 .crossfade(true)
                 .build(),
             imageLoader = imageLoader,
-            placeholder = painterResource(R.drawable.ic_launcher_foreground),
-            error = painterResource(R.drawable.ic_launcher_foreground),
+            placeholder = painterResource(R.drawable.placeholder),
+            error = painterResource(R.drawable.placeholder_error),
             contentDescription = item.nombre,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -87,34 +85,20 @@ private fun TheaterRow(
 
         Spacer(Modifier.width(12.dp))
 
-        Column(Modifier.weight(1f)) {
+        // This Column now fills the available space
+        Column(Modifier.fillMaxWidth()) {
             Text(
-                text = item.nombre ?: "(Sin nombre)",
+                text = item.nombre,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            // The old complex logic is no longer needed.
+            // If you want to show the district here, we need to add it to TheaterUi first.
+            // For now, we remove the subtitle to fix the crash.
 
-            val calle = try {
-                val f1 = item::class.members.firstOrNull { it.name == "calle" }?.call(item) as? String
-                val f2 = item::class.members.firstOrNull { it.name == "direccion" }?.call(item) as? String
-                f1 ?: f2
-            } catch (_: Exception) { null }
-
-            val sub = listOfNotNull(item.distrito, calle).joinToString(" • ")
-
-            if (sub.isNotBlank()) {
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = sub,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Divider(Modifier.padding(top = 12.dp))
+            Spacer(Modifier.height(12.dp))
+            Divider()
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.teatrope_kotlin_app.content.presentation.theaters
 
-import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teatrope_kotlin_app.content.data.ContentRepository
@@ -11,9 +10,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// Mapper function to convert DTO to UI model
+fun TeatroDto.toUi(): TheaterUi = TheaterUi(
+    id = id,
+    nombre = nombre,
+    imageUrl = imageUrl
+)
+
 data class TheaterListUiState(
     val isLoading: Boolean = false,
-    val items: List<TeatroDto> = emptyList(),
+    val items: List<TheaterUi> = emptyList(),
     val error: String? = null
 )
 
@@ -30,9 +36,13 @@ class TheaterListViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
-            val r = repo.listTeatros()
-            _state.value = r.fold(
-                onSuccess = { TheaterListUiState(isLoading = false, items = it) },
+            val result = repo.listTeatros()
+            _state.value = result.fold(
+                onSuccess = { dtos ->
+
+                    val uiItems = dtos.map { it.toUi() }
+                    TheaterListUiState(isLoading = false, items = uiItems)
+                },
                 onFailure = { TheaterListUiState(isLoading = false, error = it.message ?: "Error") }
             )
         }

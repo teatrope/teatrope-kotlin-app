@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -69,7 +68,9 @@ fun TheatersSection(
                 contentPadding = PaddingValues(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
-                modifier = modifier.fillMaxWidth().height(400.dp) // Example height, adjust as needed
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(400.dp) // Example height, adjust as needed
             ) {
                 items(state.items, key = { it.id }) { theater ->
                     TheaterCard(
@@ -114,15 +115,15 @@ private fun TheaterCard(
                         Brush.verticalGradient(
                             colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
                         )
-                    )
-                    .padding(8.dp)
+                    ),
+                contentAlignment = Alignment.BottomStart
             ) {
                 Text(
                     text = theater.nombre,
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
-                    modifier = Modifier.align(Alignment.BottomStart)
+                    modifier = Modifier.padding(8.dp)
                 )
             }
         }
