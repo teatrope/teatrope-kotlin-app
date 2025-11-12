@@ -44,9 +44,17 @@ data class UserDto(
     @SerializedName("email")    val email: String? = null
 )
 
+data class PasswordResetRequest(
+    @SerializedName("email") val email: String
+)
+
 /* --------- API --------- */
 
 interface AuthApi {
+
+    // ---- Password Reset ----
+    @POST("auth/password/reset/")
+    suspend fun passwordReset(@Body body: PasswordResetRequest): Response<Unit>
 
     // ---- Registro / Token Auth ----
     @POST("auth/register/")

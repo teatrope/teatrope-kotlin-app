@@ -33,6 +33,11 @@ class AuthRepository @Inject constructor(
         tokenProvider.setToken(null) // limpia el token local
     }
 
+    suspend fun requestPasswordReset(email: String): Result<Unit> = runCatching {
+        val res = api.passwordReset(PasswordResetRequest(email = email))
+        if (!res.isSuccessful) error(parseError(res))
+    }
+
     /* ---------------- priv ---------------- */
 
     private fun parseError(res: Response<*>): String {
