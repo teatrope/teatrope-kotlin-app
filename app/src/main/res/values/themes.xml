@@ -1,5 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Tema base de tu app -->
+    <style name="Theme.Teatropekotlinapp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 
-    <style name="Theme.Teatropekotlinapp" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Tema del splash -->
+    <style name="Theme.Teatrope.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
+    </style>
 </resources>
