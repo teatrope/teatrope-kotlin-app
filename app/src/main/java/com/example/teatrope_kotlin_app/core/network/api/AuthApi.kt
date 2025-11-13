@@ -39,9 +39,13 @@ data class TokenLoginResponse(
 )
 
 data class UserDto(
-    @SerializedName("id")       val id: String,
-    @SerializedName("username") val username: String? = null,
-    @SerializedName("email")    val email: String? = null
+    @SerializedName("id")                   val id: String,
+    @SerializedName("username")             val username: String? = null,
+    @SerializedName("email")                val email: String? = null,
+    @SerializedName("role")                 val role: String? = null,
+    @SerializedName("calle")                val calle: String? = null,
+    @SerializedName("distrito")             val distrito: String? = null,
+    @SerializedName("generos_preferidos")   val generosPreferidos: List<String>? = null
 )
 
 data class PasswordResetRequest(

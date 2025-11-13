@@ -39,9 +39,10 @@ class SignInViewModel @Inject constructor(
             try {
                 _state.value = SignInState.Loading
                 val result = repo.login(e, p)
-                
-                if (result.isSuccess) {
+
+                result.getOrNull()?.let { user ->
                     prefs.setRememberMe(remember)
+                    prefs.saveUser(user.id, user.role ?: "user")
                 }
 
                 _state.value = result.fold(

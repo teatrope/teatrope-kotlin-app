@@ -13,12 +13,14 @@ class AuthRepository @Inject constructor(
     private val tokenProvider: AuthTokenProvider
 ) {
 
-    suspend fun login(email: String, password: String): Result<Unit> = runCatching {
+    suspend fun login(email: String, password: String): Result<UserDto> = runCatching {
         val res = api.tokenLogin(TokenLoginRequest(email = email, password = password))
         if (!res.isSuccessful) error(parseError(res))
 
-        val token = res.body()?.token ?: error("Token vacío del backend")
-        tokenProvider.setToken(token)
+        val body = res.body() ?: error("Empty response from backend")
+        tokenProvider.setToken(body.token)
+        
+        body.user ?: error("User object is null in login response")
     }
 
     suspend fun register(username: String, email: String, password: String): Result<Unit> =
@@ -36,6 +38,18 @@ class AuthRepository @Inject constructor(
     suspend fun requestPasswordReset(email: String): Result<Unit> = runCatching {
         val res = api.passwordReset(PasswordResetRequest(email = email))
         if (!res.isSuccessful) error(parseError(res))
+    }
+
+    suspend fun getUser(id: String): Result<UserDto> = runCatching {
+        val res = api.usersRead(id)
+        if (!res.isSuccessful) error(parseError(res))
+        res.body() ?: error("User not found")
+    }
+
+    suspend fun updateUser(id: String, patch: Map<String, @JvmSuppressWildcards Any?>): Result<UserDto> = runCatching {
+        val res = api.usersPartialUpdate(id, patch)
+        if (!res.isSuccessful) error(parseError(res))
+        res.body() ?: error("User not found after update")
     }
 
     /* ---------------- priv ---------------- */
