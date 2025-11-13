@@ -75,7 +75,12 @@ fun MainScaffold(
                 )
             }
             composable(Routes.ComingSoon)  { ComingSoonScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }) }
-            composable(Routes.Favorites)   { FavoritesScreen(onOpenDetail = { id -> rootNav.navigate("detail/$id") }) }
+            composable(Routes.Favorites)   { 
+                FavoritesScreen(
+                    onOpenDetail = { id -> rootNav.navigate("detail/$id") }, 
+                    onOpenTheater = { tid -> rootNav.navigate("theater/$tid") }
+                )
+            }
             composable(Routes.Profile)     { ProfileScreen(onOpenSettings = { rootNav.navigate(Routes.Settings) }, onLogout = onLogout) }
         }
     }

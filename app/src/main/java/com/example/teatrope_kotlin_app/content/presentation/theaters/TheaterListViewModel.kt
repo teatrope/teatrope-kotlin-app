@@ -2,49 +2,58 @@ package com.example.teatrope_kotlin_app.content.presentation.theaters
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teatrope_kotlin_app.content.data.ContentRepository
-import com.example.teatrope_kotlin_app.core.network.api.TeatroDto
+import com.example.teatrope_kotlin_app.content.data.repository.TheaterRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// Mapper function to convert DTO to UI model
-fun TeatroDto.toUi(): TheaterUi = TheaterUi(
-    id = id,
-    nombre = nombre,
-    imageUrl = imageUrl
-)
-
-data class TheaterListUiState(
-    val isLoading: Boolean = false,
-    val items: List<TheaterUi> = emptyList(),
-    val error: String? = null
-)
-
 @HiltViewModel
 class TheaterListViewModel @Inject constructor(
-    private val repo: ContentRepository
+    private val repo: TheaterRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TheaterListUiState(isLoading = true))
-    val state: StateFlow<TheaterListUiState> = _state
+    data class UiState(
+        val theaters: List<TheaterUi> = emptyList(),
+        val loading: Boolean = false,
+        val error: String? = null
+    )
 
-    init { refresh() }
+    private val _state = MutableStateFlow(UiState(loading = true))
+    val state: StateFlow<UiState> = _state.asStateFlow()
 
-    fun refresh() {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
-            val result = repo.listTeatros()
-            _state.value = result.fold(
-                onSuccess = { dtos ->
+    init {
+        loadTheaters()
+    }
 
-                    val uiItems = dtos.map { it.toUi() }
-                    TheaterListUiState(isLoading = false, items = uiItems)
-                },
-                onFailure = { TheaterListUiState(isLoading = false, error = it.message ?: "Error") }
-            )
+    fun loadTheaters() = viewModelScope.launch {
+        _state.update { it.copy(loading = true, error = null) }
+        runCatching {
+            repo.getTheaters()
+        }.onSuccess { theaters ->
+            val uiTheaters = theaters.map { theater ->
+                val isFav = repo.isFavorite(theater.id)
+                theater.toUi(isFav) // Asumiendo que existe una función de mapeo toUi
+            }
+            _state.update { it.copy(loading = false, theaters = uiTheaters) }
+        }.onFailure { t ->
+            _state.update { it.copy(loading = false, error = t.message ?: "Error loading theaters") }
         }
     }
+
+    fun toggleFavorite(theaterId: String) = viewModelScope.launch {
+        val isCurrentlyFavorite = repo.isFavorite(theaterId)
+        if (isCurrentlyFavorite) {
+            repo.removeFavorite(theaterId)
+        } else {
+            repo.addFavorite(theaterId)
+        }
+        // Recargar la lista para reflejar el cambio
+        loadTheaters()
+    }
+    
+    fun refresh() = loadTheaters()
 }

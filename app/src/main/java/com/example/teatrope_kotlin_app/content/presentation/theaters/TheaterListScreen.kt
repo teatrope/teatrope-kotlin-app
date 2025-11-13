@@ -5,12 +5,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,7 +36,7 @@ fun TheaterListScreen(
     val state by vm.state.collectAsStateWithLifecycle()
 
     when {
-        state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         state.error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -46,8 +50,12 @@ fun TheaterListScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(state.items, key = { it.id }) { item ->
-                TheaterRow(item = item, onClick = { onOpenTheater(item.id) })
+            items(state.theaters, key = { it.id }) { theater ->
+                TheaterRow(
+                    item = theater,
+                    onClick = { onOpenTheater(theater.id) },
+                    onToggleFavorite = { vm.toggleFavorite(theater.id) }
+                )
             }
         }
     }
@@ -55,8 +63,9 @@ fun TheaterListScreen(
 
 @Composable
 private fun TheaterRow(
-    item: TheaterUi, // <-- THE FIX IS HERE
-    onClick: () -> Unit
+    item: TheaterUi,
+    onClick: () -> Unit,
+    onToggleFavorite: () -> Unit
 ) {
     val ctx = LocalContext.current
     val imageLoader: ImageLoader = LocalContext.current.imageLoader
@@ -70,7 +79,7 @@ private fun TheaterRow(
     ) {
         AsyncImage(
             model = ImageRequest.Builder(ctx)
-                .data(item.imageUrl) // Use imageUrl from TheaterUi
+                .data(item.imageUrl)
                 .crossfade(true)
                 .build(),
             imageLoader = imageLoader,
@@ -85,20 +94,31 @@ private fun TheaterRow(
 
         Spacer(Modifier.width(12.dp))
 
-        // This Column now fills the available space
-        Column(Modifier.fillMaxWidth()) {
+        Column(Modifier.weight(1f)) { // Ocupa el espacio disponible
             Text(
                 text = item.nombre,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            // The old complex logic is no longer needed.
-            // If you want to show the district here, we need to add it to TheaterUi first.
-            // For now, we remove the subtitle to fix the crash.
-
-            Spacer(Modifier.height(12.dp))
-            Divider()
+            if (item.descripcion != null) {
+                Text(
+                    text = item.descripcion,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Gray
+                )
+            }
+        }
+        
+        IconButton(onClick = onToggleFavorite) {
+            Icon(
+                imageVector = if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Toggle Favorite",
+                tint = if (item.isFavorite) Color.Red else Color.Gray
+            )
         }
     }
+    Divider(modifier = Modifier.padding(horizontal = 16.dp))
 }
