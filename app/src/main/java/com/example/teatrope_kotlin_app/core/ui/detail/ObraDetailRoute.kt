@@ -25,6 +25,8 @@ fun ObraDetailRoute(
             obra = state.obraDetail,
             funciones = state.funciones,
             reparto = state.reparto,
+            isFavorite = state.isFavorite,
+            onToggleFavorite = { obrasVm.toggleFavorite() },
             onBack = onBack
         )
         state.error != null -> ObraDetailError(msg = state.error) { obrasVm.loadObraById(obraId) }

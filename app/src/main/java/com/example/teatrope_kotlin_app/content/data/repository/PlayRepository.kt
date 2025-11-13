@@ -11,4 +11,10 @@ interface PlayRepository {
     suspend fun getPlay(id: String): Play
     suspend fun getFunciones(): List<FuncionDto>
     suspend fun getPersonas(): List<PersonaDto>
+
+
+    suspend fun isFavorite(id: String): Boolean
+    suspend fun addFavorite(id: String)
+    suspend fun removeFavorite(id: String)
+    suspend fun getFavoritePlays(): List<Play>
 }

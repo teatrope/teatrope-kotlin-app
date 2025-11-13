@@ -23,26 +23,27 @@ class ObrasViewModel @Inject constructor(
 ) : ViewModel() {
 
     data class UiState(
-
         private val allItems: List<ObraUi> = emptyList(),
         val loading: Boolean = false,
         val error: String? = null,
-
-
         val selectedGenre: String = "All",
         val selectedDistrict: String = "All",
 
-
+        // Detail Screen State
         val obraDetail: ObraUi? = null,
         val loadingDetail: Boolean = false,
         val funciones: List<FuncionUi> = emptyList(),
         val loadingFunciones: Boolean = false,
         val reparto: List<PersonaUi> = emptyList(),
-        val loadingReparto: Boolean = false
+        val loadingReparto: Boolean = false,
+        val isFavorite: Boolean = false,
+
+        // Favorites Screen State
+        val favoriteItems: List<ObraUi> = emptyList(),
+        val loadingFavorites: Boolean = false
     ) {
         val genres: List<String> = listOf("All") + allItems.map { it.genero }.distinct()
         val districts: List<String> = listOf("All") + allItems.map { it.distrito }.distinct()
-
 
         val items: List<ObraUi> = allItems.filter { obra ->
             (selectedGenre == "All" || obra.genero == selectedGenre) &&
@@ -55,6 +56,19 @@ class ObrasViewModel @Inject constructor(
 
     init {
         load()
+    }
+
+    fun toggleFavorite() = viewModelScope.launch {
+        val currentObraId = _state.value.obraDetail?.id ?: return@launch
+        val isCurrentlyFavorite = _state.value.isFavorite
+
+        _state.update { it.copy(isFavorite = !isCurrentlyFavorite) }
+
+        if (isCurrentlyFavorite) {
+            repo.removeFavorite(currentObraId)
+        } else {
+            repo.addFavorite(currentObraId)
+        }
     }
 
     fun setGenre(genre: String) {
@@ -83,12 +97,14 @@ class ObrasViewModel @Inject constructor(
     fun loadObraById(id: String) = viewModelScope.launch {
         _state.update { it.copy(loadingDetail = true, loadingFunciones = true, loadingReparto = true, error = null) }
 
-
+        // Cargar detalles de la obra y estado de favorito
         runCatching {
-            repo.getPlay(id)
-        }.onSuccess { play ->
+            val play = repo.getPlay(id)
+            val isFav = repo.isFavorite(id)
+            Pair(play, isFav)
+        }.onSuccess { (play, isFav) ->
             _state.update {
-                it.copy(loadingDetail = false, obraDetail = play.toUi())
+                it.copy(loadingDetail = false, obraDetail = play.toUi(), isFavorite = isFav)
             }
         }.onFailure { t ->
             _state.update {
@@ -96,36 +112,38 @@ class ObrasViewModel @Inject constructor(
             }
         }
 
+        // Cargar funciones
+        runCatching { repo.getFunciones() }
+            .onSuccess { funcionesDto ->
+                val funcionesUi = funcionesDto
+                    .filter { it.obra.id == id }
+                    .map { it.toUi() }
+                _state.update { it.copy(loadingFunciones = false, funciones = funcionesUi) }
+            }.onFailure { t ->
+                _state.update { it.copy(loadingFunciones = false, error = t.message ?: "Error loading funciones") }
+            }
 
+        // Cargar reparto
+        runCatching { repo.getPersonas() }
+            .onSuccess { personasDto ->
+                val repartoUi = personasDto
+                    .filter { it.obra.id == id }
+                    .map { it.toUi() }
+                _state.update { it.copy(loadingReparto = false, reparto = repartoUi) }
+            }.onFailure { t ->
+                _state.update { it.copy(loadingReparto = false, error = t.message ?: "Error loading reparto") }
+            }
+    }
+
+    fun loadFavorites() = viewModelScope.launch {
+        _state.update { it.copy(loadingFavorites = true) }
         runCatching {
-            repo.getFunciones()
-        }.onSuccess { funcionesDto ->
-            val funcionesUi = funcionesDto
-                .filter { it.obra.id == id }
-                .map { it.toUi() }
-            _state.update {
-                it.copy(loadingFunciones = false, funciones = funcionesUi)
-            }
+            repo.getFavoritePlays()
+        }.onSuccess { favoritePlays ->
+            val ui = favoritePlays.map { it.toUi() }
+            _state.update { it.copy(loadingFavorites = false, favoriteItems = ui) }
         }.onFailure { t ->
-            _state.update {
-                it.copy(loadingFunciones = false, error = t.message ?: "Error loading funciones")
-            }
-        }
-
-
-        runCatching {
-            repo.getPersonas()
-        }.onSuccess { personasDto ->
-            val repartoUi = personasDto
-                .filter { it.obra.id == id }
-                .map { it.toUi() }
-            _state.update {
-                it.copy(loadingReparto = false, reparto = repartoUi)
-            }
-        }.onFailure { t ->
-            _state.update {
-                it.copy(loadingReparto = false, error = t.message ?: "Error loading reparto")
-            }
+            _state.update { it.copy(loadingFavorites = false, error = t.message ?: "Error loading favorites") }
         }
     }
 

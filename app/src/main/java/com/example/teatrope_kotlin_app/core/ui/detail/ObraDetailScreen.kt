@@ -44,6 +44,8 @@ import java.util.TimeZone
 @Composable
 fun ObraDetailScreen(
     obra: ObraUi,
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit,
     funciones: List<FuncionUi>,
     reparto: List<PersonaUi>,
     modifier: Modifier = Modifier,
@@ -80,7 +82,11 @@ fun ObraDetailScreen(
             }
         }
 
-        FloatingActionButtons(obra.buyUrl)
+        FloatingActionButtons(
+            buyUrl = obra.buyUrl,
+            isFavorite = isFavorite,
+            onToggleFavorite = onToggleFavorite
+        )
     }
 }
 
@@ -261,7 +267,11 @@ private fun UserRatingSection() {
 }
 
 @Composable
-private fun BoxScope.FloatingActionButtons(buyUrl: String) {
+private fun BoxScope.FloatingActionButtons(
+    buyUrl: String,
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit
+) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
@@ -272,9 +282,8 @@ private fun BoxScope.FloatingActionButtons(buyUrl: String) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-         var isFavorite by remember { mutableStateOf(false) }
         OutlinedButton(
-             onClick = { isFavorite = !isFavorite },
+             onClick = { onToggleFavorite() },
              modifier = Modifier.size(56.dp),
              shape = CircleShape,
              border = BorderStroke(1.dp, Color(0xFFEF4444)),
