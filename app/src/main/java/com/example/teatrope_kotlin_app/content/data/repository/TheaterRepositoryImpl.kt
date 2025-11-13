@@ -26,6 +26,12 @@ class TheaterRepositoryImpl @Inject constructor(
         return requireNotNull(resp.body()).toDomain()
     }
 
+    override suspend fun searchTheaters(query: String): List<Theater> {
+        val resp = api.buscar(query)
+        if (!resp.isSuccessful) error("HTTP ${resp.code()}")
+        return resp.body()?.teatros?.map { it.toDomain() } ?: emptyList()
+    }
+
     // --- Implementación de Favoritos ---
 
     override suspend fun isFavorite(id: String): Boolean {

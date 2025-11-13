@@ -19,9 +19,9 @@ fun FuncionDto.toUi(): FuncionUi {
         id = id,
         obraTitulo = obra.titulo,
         teatroNombre = obra.teatro.nombre,
-        fecha = fecha,
-        duracion = "${duracionMinutos} min",
-        disponibilidad = "${disponibilidadAsientos} asientos disponibles",
+        fecha = fecha.orEmpty(),
+        duracion = "120 min",
+        disponibilidad = disponibilidad.orEmpty(),
         obraImageUrl = obra.imageUrl.orEmpty(),
         buyUrl = obra.buyUrl.orEmpty()
     )

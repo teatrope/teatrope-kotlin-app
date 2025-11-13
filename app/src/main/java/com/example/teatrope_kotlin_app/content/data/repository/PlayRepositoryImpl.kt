@@ -42,11 +42,15 @@ class PlayRepositoryImpl @Inject constructor (
     }
 
     override suspend fun getPersonas(): List<PersonaDto> {
-        // Asumiendo que existe un endpoint `personasList()` que no he visto antes.
-        // Si esto da error, habría que crearlo en ContentApi.kt
         val resp = api.personasList()
         if (!resp.isSuccessful) error("HTTP ${resp.code()}")
         return resp.body() ?: emptyList()
+    }
+
+    override suspend fun searchPlays(query: String): List<Play> {
+        val resp = api.buscar(query)
+        if (!resp.isSuccessful) error("HTTP ${resp.code()}")
+        return resp.body()?.obras?.map { it.toDomain() } ?: emptyList()
     }
 
     // --- Implementación de Favoritos ---
@@ -64,7 +68,6 @@ class PlayRepositoryImpl @Inject constructor (
     }
 
     override suspend fun getFavoritePlays(): List<Play> {
-        // Obtenemos todas las obras y filtramos por las que están en nuestra lista de favoritos
         val allPlays = getPlays()
         return allPlays.filter { it.id in favoritePlayIds }
     }

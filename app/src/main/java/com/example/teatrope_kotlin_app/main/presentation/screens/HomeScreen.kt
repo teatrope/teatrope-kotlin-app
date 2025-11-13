@@ -1,34 +1,30 @@
 package com.example.teatrope_kotlin_app.main.presentation.screens
 
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import coil.Coil
-import coil.ImageLoader
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.teatrope_kotlin_app.main.presentation.components.CityDropdown
-import com.example.teatrope_kotlin_app.main.presentation.components.FilterDropdown
-import com.example.teatrope_kotlin_app.main.presentation.components.PromoCard
-import com.example.teatrope_kotlin_app.main.presentation.theater.TheatersSection
-import com.example.teatrope_kotlin_app.presentation.theater.ObrasSection
-import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListViewModel
-import com.example.teatrope_kotlin_app.presentation.theater.ObrasViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.teatrope_kotlin_app.ui.theme.AccentRed
-
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.Coil
+import coil.ImageLoader
+import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListViewModel
+import com.example.teatrope_kotlin_app.main.presentation.components.DropdownSmall
+import com.example.teatrope_kotlin_app.main.presentation.components.PromoCard
+import com.example.teatrope_kotlin_app.main.presentation.components.Segmented
+import com.example.teatrope_kotlin_app.main.presentation.theater.TheatersSection
+import com.example.teatrope_kotlin_app.presentation.theater.ObrasSection
+import com.example.teatrope_kotlin_app.presentation.theater.ObrasViewModel
 
 @Composable
 fun HomeScreen(
@@ -36,19 +32,20 @@ fun HomeScreen(
     onOpenNotifications: () -> Unit,
     onOpenTheater: (String) -> Unit,
     onOpenTheatersList: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    obrasVm: ObrasViewModel = hiltViewModel(),
+    theatersVm: TheaterListViewModel = hiltViewModel(),
 ) {
-    val theatersVm: TheaterListViewModel = hiltViewModel()
-    val theatersState = theatersVm.state.collectAsStateWithLifecycle().value
-
-    val obrasVm: ObrasViewModel = hiltViewModel()
     val obrasState by obrasVm.state.collectAsStateWithLifecycle()
+    val theatersState by theatersVm.state.collectAsStateWithLifecycle()
 
-    val ctx = LocalContext.current
-    val imageLoader: ImageLoader = Coil.imageLoader(ctx)
+    val imageLoader: ImageLoader = Coil.imageLoader(LocalContext.current)
 
-    var tab by remember { mutableStateOf(0) } // 0=Services(Obras), 1=Theaters
+    var tab by remember { mutableStateOf(0) } // 0=Obras, 1=Theaters
     var city by remember { mutableStateOf("Lima") }
+
+    val searchQuery = if (tab == 0) obrasState.searchQuery else theatersState.searchQuery
+    val onSearchQueryChanged = if (tab == 0) obrasVm::onSearchQueryChanged else theatersVm::onSearchQueryChanged
 
     Column(
         modifier
@@ -58,111 +55,66 @@ fun HomeScreen(
                     listOf(Color(0xFF0E121A), Color(0xFF0B0E15))
                 )
             )
-            .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        // Header
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("teatrope", color = Color(0xFFEF4444), fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text("teatrope", color = Color(0xFFEF4444), fontSize = 28.sp)
             IconButton(onClick = onOpenNotifications) {
-                Icon(Icons.Outlined.Notifications, contentDescription = null, tint = Color.White)
+                Icon(Icons.Outlined.Notifications, contentDescription = null)
             }
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(12.dp))
 
-        // --- Top Filter Bar ---
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CityDropdown(
-                label = "Choose city",
-                value = city,
-                onClick = { /* TODO: City Picker */ }
+            DropdownSmall(label = "City", value = city, items = listOf("Lima"), onSelect = { city = it })
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChanged,
+                singleLine = true,
+                placeholder = { Text("Buscar obras o teatros...", fontSize = 14.sp) },
+                leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.weight(1f).height(48.dp),
             )
-            Spacer(Modifier.weight(1f)) // This will push the icons to the right
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)){
-                Button(
-                    onClick = { /* TODO: Search Action */ },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentRed),
-                    modifier = Modifier.size(56.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(Icons.Outlined.Search, contentDescription = "Search", tint = Color.White)
-                }
-                /*Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color.White.copy(alpha = 0.1f),
-                    modifier = Modifier.size(56.dp)
-                ) {}
-                 */
-            }
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(14.dp))
 
-        PromoCard(onClick = { /* TODO promos */ })
+        PromoCard(
+            title = "Know the promotions of\nTuesdays & Monday",
+            cta = "Go",
+            onClick = { /* TODO promos */ }
+        )
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(14.dp))
 
-        // --- Tab Buttons ---
+        Segmented(
+            options = listOf("Obras", "Theaters"),
+            selectedIndex = tab,
+            onSelect = { tab = it }
+        )
+
+        Spacer(Modifier.height(14.dp))
+
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            val servicesSelected = tab == 0
-            Button(
-                onClick = { tab = 0 },
-                modifier = Modifier.weight(1f).height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (servicesSelected) AccentRed else Color.White.copy(alpha = 0.1f),
-                    contentColor = if (servicesSelected) Color.White else Color.White.copy(alpha = 0.8f)
-                )
-            ) {
-                Text("Services", fontWeight = FontWeight.SemiBold)
+            DropdownSmall("City", city, items = listOf("Lima"), onSelect = { city = it })
+            if (tab == 0) {
+                DropdownSmall("Genre", obrasState.selectedGenre, items = obrasState.genres, onSelect = obrasVm::setGenre)
+            } else {
+                DropdownSmall("District", theatersState.selectedDistrict, items = theatersState.districts, onSelect = theatersVm::setDistrict)
             }
-
-            val theatersSelected = tab == 1
-            Button(
-                onClick = { tab = 1 },
-                modifier = Modifier.weight(1f).height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (theatersSelected) AccentRed else Color.White.copy(alpha = 0.1f),
-                    contentColor = if (theatersSelected) Color.White else Color.White.copy(alpha = 0.8f)
-                )
-            ) {
-                Text("Theaters", fontWeight = FontWeight.SemiBold)
-            }
-        }
-
-        Spacer(Modifier.height(20.dp))
-
-        // --- Bottom Filter Buttons ---
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            FilterDropdown(
-                label = "District",
-                value = obrasState.selectedDistrict,
-                options = obrasState.districts,
-                onSelect = { obrasVm.setDistrict(it) },
-                modifier = Modifier.weight(1f)
-            )
-            FilterDropdown(
-                label = "Genre",
-                value = obrasState.selectedGenre,
-                options = obrasState.genres,
-                onSelect = { obrasVm.setGenre(it) },
-                modifier = Modifier.weight(1f)
-            )
         }
 
         Spacer(Modifier.height(18.dp))
 
-        // Secciones
         when (tab) {
             0 -> ObrasSection(
                 items = obrasState.items,
@@ -171,7 +123,6 @@ fun HomeScreen(
                 onOpen = onOpenDetail,
                 onRetry = { obrasVm.refresh() }
             )
-
             1 -> TheatersSection(
                 state = theatersState,
                 imageLoader = imageLoader,

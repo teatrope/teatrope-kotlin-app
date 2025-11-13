@@ -13,12 +13,14 @@ import com.example.teatrope_kotlin_app.content.presentation.personas.toUi
 import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterUi
 import com.example.teatrope_kotlin_app.content.presentation.theaters.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ObrasViewModel @Inject constructor(
@@ -30,6 +32,7 @@ class ObrasViewModel @Inject constructor(
         private val allItems: List<ObraUi> = emptyList(),
         val loading: Boolean = false,
         val error: String? = null,
+        val searchQuery: String = "",
         val selectedGenre: String = "All",
         val selectedDistrict: String = "All",
 
@@ -51,9 +54,17 @@ class ObrasViewModel @Inject constructor(
         val genres: List<String> = listOf("All") + allItems.map { it.genero }.distinct()
         val districts: List<String> = listOf("All") + allItems.map { it.distrito }.distinct()
 
-        val items: List<ObraUi> = allItems.filter { obra ->
-            (selectedGenre == "All" || obra.genero == selectedGenre) &&
-            (selectedDistrict == "All" || obra.distrito == selectedDistrict)
+        // La lista filtrada se calcula aquí
+        val items: List<ObraUi> get() {
+            val filteredBySearch = if (searchQuery.isBlank()) {
+                allItems
+            } else {
+                allItems.filter { it.titulo.contains(searchQuery, ignoreCase = true) }
+            }
+            return filteredBySearch.filter { obra ->
+                (selectedGenre == "All" || obra.genero == selectedGenre) &&
+                (selectedDistrict == "All" || obra.distrito == selectedDistrict)
+            }
         }
     }
 
@@ -62,6 +73,10 @@ class ObrasViewModel @Inject constructor(
 
     init {
         load()
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _state.update { it.copy(searchQuery = query) }
     }
 
     fun toggleFavorite() = viewModelScope.launch {
@@ -86,17 +101,14 @@ class ObrasViewModel @Inject constructor(
     }
 
     fun load() = viewModelScope.launch {
-        _state.update { it.copy(loading = true, error = null) }
-
+        _state.update { it.copy(loading = true, error = null, searchQuery = "") }
         runCatching { playRepo.getPlays() }
             .onSuccess { plays ->
                 val ui = plays.map { it.toUi() }
                 _state.update { it.copy(loading = false, allItems = ui) }
             }
             .onFailure { t ->
-                _state.update {
-                    it.copy(loading = false, error = t.message ?: "Error")
-                }
+                _state.update { it.copy(loading = false, error = t.message ?: "Error") }
             }
     }
 
@@ -154,7 +166,6 @@ class ObrasViewModel @Inject constructor(
         runCatching { theaterRepo.getFavoriteTheaters() }
             .onSuccess { favoriteTheaters ->
                 val ui = favoriteTheaters.map { 
-                    // Aquí no tenemos el estado de favorito, pero como estamos en la lista de favoritos, asumimos que es true
                     it.toUi(isFavorite = true) 
                 }
                 _state.update { it.copy(loadingFavoriteTheaters = false, favoriteTheaters = ui) }

@@ -5,37 +5,47 @@ import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.*
 
+// Search Result DTO
+data class BusquedaResultDto(
+    @SerializedName("obras") val obras: List<ObraDto>,
+    @SerializedName("teatros") val teatros: List<TeatroDto>
+)
 
+// Corrected mapper function
 fun ObraDto.toUi(): ObraUi = ObraUi(
     id = id,
     titulo = titulo,
     genero = genero,
     imageUrl = imageUrl.orEmpty(),
     teatroNombre = teatro.nombre,
-    distrito = teatro.distrito.orEmpty(),
     buyUrl = buyUrl.orEmpty(),
-    director = directorNombre.orEmpty()
+    director = directorNombre.orEmpty(),
+
+    distrito = teatro.distrito ?: ""
 )
 
 // ---------- DTOs ----------
 data class FuncionDto(
     @SerializedName("id") val id: String,
-    @SerializedName("obra") val obra: ObraDto,
-    @SerializedName("fecha") val fecha: String,
-    @SerializedName("duracion_minutos") val duracionMinutos: Int,
-    @SerializedName("disponibilidad_asientos") val disponibilidadAsientos: Int
+    @SerializedName("obra") val obra: ObraDto, // Corregido para anidar ObraDto
+    @SerializedName("fecha") val fecha: String?,
+    @SerializedName("hora") val hora: String?,
+    @SerializedName("disponibilidad") val disponibilidad: String?,
+    @SerializedName("buy_url") val buyUrl: String?
 )
+
 
 data class TeatroDto(
     @SerializedName("id") val id: String,
     @SerializedName("nombre") val nombre: String = "",
     @SerializedName("descripcion") val descripcion: String? = null,
-    @SerializedName("calle") val calle: String? = null,
+    @SerializedName("calle") val calle: String? = null,        //
     @SerializedName("distrito") val distrito: String? = null,
     @SerializedName("latitud") val latitud: Double? = null,
     @SerializedName("longitud") val longitud: Double? = null,
-    @SerializedName("image_url") val imageUrl: String? = null
+    @SerializedName("image_url") val imageUrl: String? = null  //
 )
+
 
 data class ObraDto(
     @SerializedName("id") val id: String,
@@ -47,6 +57,7 @@ data class ObraDto(
     @SerializedName("image_url") val imageUrl: String? = null,
     @SerializedName("buy_url") val buyUrl: String? = null
 )
+
 
 data class ObraWriteRequest(
     @SerializedName("teatro") val teatroId: String,
@@ -60,7 +71,7 @@ data class ObraWriteRequest(
 
 data class PersonaDto(
     @SerializedName("id") val id: String,
-    @SerializedName("obra") val obra: ObraDto,
+    @SerializedName("obra") val obra: ObraDto, // Corregido para anidar ObraDto
     @SerializedName("nombre_completo") val nombreCompleto: String,
     @SerializedName("rol") val rol: String,
     @SerializedName("image_url") val imageUrl: String? = null
@@ -85,9 +96,9 @@ typealias TeatroUpdateRequest = TeatroCreateRequest
 
 interface ContentApi {
 
-    // Personas
-    @GET("content/personas/")
-    suspend fun personasList(): Response<List<PersonaDto>>
+    // --- Busquedas ---
+    @GET("discovery/busquedas/")
+    suspend fun buscar(@Query("q") query: String): Response<BusquedaResultDto>
 
     // Funciones
     @GET("content/funciones/")
@@ -132,6 +143,10 @@ interface ContentApi {
 
     @DELETE("content/obras/{id}/")
     suspend fun obrasDelete(@Path("id") id: String): Response<Unit>
+    
+    // Personas
+    @GET("content/personas/")
+    suspend fun personasList(): Response<List<PersonaDto>>
 
     // Teatros
     @GET("content/teatros/")

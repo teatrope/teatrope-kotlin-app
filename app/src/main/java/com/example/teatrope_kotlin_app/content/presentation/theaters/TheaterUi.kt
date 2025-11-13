@@ -7,7 +7,8 @@ data class TheaterUi(
     val nombre: String,
     val descripcion: String?,
     val imageUrl: String?,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val distrito: String?
 )
 
 fun Theater.toUi(isFavorite: Boolean) = TheaterUi(
@@ -15,5 +16,6 @@ fun Theater.toUi(isFavorite: Boolean) = TheaterUi(
     nombre = nombre,
     descripcion = descripcion,
     imageUrl = imageUrl,
-    isFavorite = isFavorite
+    isFavorite = isFavorite,
+    distrito = distrito
 )

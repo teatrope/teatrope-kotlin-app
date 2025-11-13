@@ -6,6 +6,9 @@ interface TheaterRepository {
     suspend fun getTheaters(): List<Theater>
     suspend fun getTheater(id: String): Theater
 
+    // Search
+    suspend fun searchTheaters(query: String): List<Theater>
+
     // Favorite Theaters
     suspend fun isFavorite(id: String): Boolean
     suspend fun addFavorite(id: String)
