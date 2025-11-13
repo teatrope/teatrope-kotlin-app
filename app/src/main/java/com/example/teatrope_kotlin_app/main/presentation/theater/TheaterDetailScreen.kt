@@ -15,7 +15,8 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,8 +31,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
-import com.example.teatrope_kotlin_app.main.presentation.theaterimport.TheaterDetailState
-import com.example.teatrope_kotlin_app.main.presentation.theaterimport.TheaterDetailViewModel
+import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterDetailState
+import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterDetailViewModel
+import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterUi
 import com.example.teatrope_kotlin_app.ui.theme.AccentRed
 
 @Composable
@@ -61,7 +63,8 @@ fun TheaterDetailScreen(
             TheaterDetailContent(
                 state = state,
                 onBack = onBack,
-                onOpenShow = onOpenShow
+                onOpenShow = onOpenShow,
+                onToggleFavorite = { vm.toggleFavorite() }
             )
         }
     }
@@ -71,7 +74,8 @@ fun TheaterDetailScreen(
 private fun TheaterDetailContent(
     state: TheaterDetailState,
     onBack: () -> Unit,
-    onOpenShow: (String) -> Unit
+    onOpenShow: (String) -> Unit,
+    onToggleFavorite: () -> Unit
 ) {
     val theater = state.theater!!
 
@@ -88,12 +92,15 @@ private fun TheaterDetailContent(
             }
         }
 
-        FloatingButtons(onOpenShow)
+        FloatingButtons(
+            isFavorite = theater.isFavorite, // Usamos el estado del VM
+            onToggleFavorite = onToggleFavorite // Pasamos la función del VM
+        )
     }
 }
 
 @Composable
-private fun Header(theater: com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterUi, onBack: () -> Unit) {
+private fun Header(theater: TheaterUi, onBack: () -> Unit) {
     Box(Modifier.fillMaxWidth().height(320.dp)) {
         AsyncImage(
             model = theater.imageUrl,
@@ -101,7 +108,6 @@ private fun Header(theater: com.example.teatrope_kotlin_app.content.presentation
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        // Back button
         IconButton(
             onClick = onBack,
             modifier = Modifier
@@ -112,7 +118,6 @@ private fun Header(theater: com.example.teatrope_kotlin_app.content.presentation
         ) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
         }
-        // Rating chip
         Card(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -134,7 +139,7 @@ private fun Header(theater: com.example.teatrope_kotlin_app.content.presentation
 }
 
 @Composable
-private fun InfoSection(theater: com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterUi) {
+private fun InfoSection(theater: TheaterUi) {
     Column(Modifier.padding(16.dp)) {
         Text(theater.nombre, style = MaterialTheme.typography.headlineLarge, color = AccentRed, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(12.dp))
@@ -145,7 +150,7 @@ private fun InfoSection(theater: com.example.teatrope_kotlin_app.content.present
         }
         Spacer(Modifier.height(12.dp))
         Text(
-            "The Municipal Theater of Lima is one of the main theaters in the city of Lima. It is located on the fourth block of Jirón Ica, right in the historic center of Peru's capital.",
+            theater.descripcion ?: "Descripción no disponible",
             style = MaterialTheme.typography.bodyMedium, 
             color = Color.White.copy(alpha = 0.8f)
         )
@@ -186,8 +191,10 @@ private fun PlayCard(play: ObraUi, onClick: () -> Unit) {
 }
 
 @Composable
-private fun BoxScope.FloatingButtons(onOpenShow: (String) -> Unit) {
-    var isFavorite by remember { mutableStateOf(false) }
+private fun BoxScope.FloatingButtons(
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit
+) {
     Row(
         modifier = Modifier
             .align(Alignment.BottomCenter)
@@ -209,14 +216,14 @@ private fun BoxScope.FloatingButtons(onOpenShow: (String) -> Unit) {
         }
 
         OutlinedButton(
-            onClick = { isFavorite = !isFavorite },
+            onClick = onToggleFavorite, // <-- Conectado al VM
             modifier = Modifier.size(56.dp),
             shape = CircleShape,
             border = BorderStroke(1.dp, AccentRed),
             contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
-                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, // <-- Conectado al VM
                 contentDescription = "Add to favorites",
                 tint = AccentRed,
                 modifier = Modifier.size(28.dp)

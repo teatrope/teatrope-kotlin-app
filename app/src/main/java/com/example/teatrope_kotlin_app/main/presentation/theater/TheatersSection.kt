@@ -18,12 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListUiState
+import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterListViewModel
 import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterUi
 
 @Composable
 fun TheatersSection(
-    state: TheaterListUiState,
+    state: TheaterListViewModel.UiState,
     imageLoader: ImageLoader,
     onOpenTheater: (String) -> Unit,
     onRetry: () -> Unit,
@@ -42,10 +42,10 @@ fun TheatersSection(
         Spacer(Modifier.height(8.dp))
 
         when {
-            state.isLoading -> Box(
+            state.loading -> Box( // <-- Corregido a 'loading'
                 Modifier
                     .fillMaxWidth()
-                    .height(180.dp), // Adjusted height for grid
+                    .height(180.dp),
                 contentAlignment = Alignment.Center
             ) { CircularProgressIndicator() }
 
@@ -70,9 +70,9 @@ fun TheatersSection(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = modifier
                     .fillMaxWidth()
-                    .height(400.dp) // Example height, adjust as needed
+                    .height(400.dp)
             ) {
-                items(state.items, key = { it.id }) { theater ->
+                items(items = state.theaters, key = { it.id }) { theater -> // <-- Corregido a 'theaters'
                     TheaterCard(
                         theater = theater,
                         onClick = { onOpenTheater(theater.id) },

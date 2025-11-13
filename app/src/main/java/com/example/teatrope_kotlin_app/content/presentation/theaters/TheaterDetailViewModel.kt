@@ -1,15 +1,12 @@
-package com.example.teatrope_kotlin_app.main.presentation.theaterimport
+package com.example.teatrope_kotlin_app.content.presentation.theaters
 
 import androidx.lifecycle.SavedStateHandle
-
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teatrope_kotlin_app.content.data.ContentRepository
-import com.example.teatrope_kotlin_app.content.data.repository.PlayRepository
-import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
-import com.example.teatrope_kotlin_app.content.presentation.theaters.TheaterUi
 import com.example.teatrope_kotlin_app.content.data.mapper.toUi
+import com.example.teatrope_kotlin_app.content.data.repository.PlayRepository
+import com.example.teatrope_kotlin_app.content.data.repository.TheaterRepository
+import com.example.teatrope_kotlin_app.content.presentation.theaters.ObraUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +24,7 @@ data class TheaterDetailState(
 
 @HiltViewModel
 class TheaterDetailViewModel @Inject constructor(
-    private val contentRepo: ContentRepository,
+    private val theaterRepo: TheaterRepository,
     private val playRepo: PlayRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -41,36 +38,44 @@ class TheaterDetailViewModel @Inject constructor(
         loadDetails()
     }
 
+    fun toggleFavorite() = viewModelScope.launch {
+        val currentTheater = _state.value.theater ?: return@launch
+        val isCurrentlyFavorite = currentTheater.isFavorite
+
+        // Actualizamos el estado de la UI inmediatamente
+        _state.update {
+            it.copy(theater = currentTheater.copy(isFavorite = !isCurrentlyFavorite))
+        }
+
+        // Hacemos el cambio en el repositorio
+        if (isCurrentlyFavorite) {
+            theaterRepo.removeFavorite(theaterId)
+        } else {
+            theaterRepo.addFavorite(theaterId)
+        }
+    }
+
     fun loadDetails() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
             try {
-                // Call the repo that returns Result and get the value or throw
-                val theaterDto = contentRepo.getTeatro(theaterId).getOrThrow()
-
-                // Call the repo that can throw an exception directly
+                val theater = theaterRepo.getTheater(theaterId)
+                val isFavorite = theaterRepo.isFavorite(theaterId)
+                
                 val allPlays = playRepo.getPlays()
-
-                // Filter the plays for the current theater
                 val theaterPlays = allPlays
                     .filter { it.theater.id == theaterId }
                     .map { it.toUi() }
 
-                // Update state with success
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        theater = TheaterUi(
-                            id = theaterDto.id,
-                            nombre = theaterDto.nombre,
-                            imageUrl = theaterDto.imageUrl
-                        ),
+                        theater = theater.toUi(isFavorite = isFavorite),
                         plays = theaterPlays
                     )
                 }
             } catch (e: Exception) {
-                // Catch any exception from either repository call
                 _state.update {
                     it.copy(
                         isLoading = false,
