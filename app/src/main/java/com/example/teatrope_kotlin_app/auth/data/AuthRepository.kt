@@ -2,7 +2,9 @@ package com.example.teatrope_kotlin_app.auth.data
 
 import com.example.teatrope_kotlin_app.core.network.api.*
 import com.example.teatrope_kotlin_app.core.network.AuthTokenProvider
+import com.example.teatrope_kotlin_app.core.network.SessionManager
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.StateFlow
 import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -10,8 +12,12 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepository @Inject constructor(
     private val api: AuthApi,
-    private val tokenProvider: AuthTokenProvider
+    private val tokenProvider: AuthTokenProvider,
+    private val sessionManager: SessionManager // Inyectamos el SessionManager
 ) {
+
+    // Exponemos el Flow del usuario actual desde el SessionManager
+    val currentUser: StateFlow<UserDto?> = sessionManager.currentUser
 
     suspend fun login(email: String, password: String): Result<UserDto> = runCatching {
         val res = api.tokenLogin(TokenLoginRequest(email = email, password = password))
@@ -20,7 +26,9 @@ class AuthRepository @Inject constructor(
         val body = res.body() ?: error("Empty response from backend")
         tokenProvider.setToken(body.token)
         
-        body.user ?: error("User object is null in login response")
+        val user = body.user ?: error("User object is null in login response")
+        sessionManager.saveUser(user) // Guardamos el usuario en la sesión
+        user
     }
 
     suspend fun register(username: String, email: String, password: String): Result<Unit> =
@@ -32,7 +40,8 @@ class AuthRepository @Inject constructor(
     suspend fun logout(): Result<Unit> = runCatching {
         val r = api.tokenLogout()
         if (!r.isSuccessful) error(parseError(r))
-        tokenProvider.setToken(null) // limpia el token local
+        tokenProvider.setToken(null)
+        sessionManager.clearSession()
     }
 
     suspend fun requestPasswordReset(email: String): Result<Unit> = runCatching {
@@ -51,8 +60,6 @@ class AuthRepository @Inject constructor(
         if (!res.isSuccessful) error(parseError(res))
         res.body() ?: error("User not found after update")
     }
-
-    /* ---------------- priv ---------------- */
 
     private fun parseError(res: Response<*>): String {
         return try {

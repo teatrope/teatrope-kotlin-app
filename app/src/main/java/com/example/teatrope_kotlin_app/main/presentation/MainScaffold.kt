@@ -12,10 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.teatrope_kotlin_app.main.presentation.screens.*
+import com.example.teatrope_kotlin_app.main.presentation.profile.ProfileScreen
+import com.example.teatrope_kotlin_app.main.presentation.screens.ComingSoonScreen
+import com.example.teatrope_kotlin_app.main.presentation.screens.FavoritesScreen
+import com.example.teatrope_kotlin_app.main.presentation.screens.HomeScreen
 import com.example.teatrope_kotlin_app.navigation.Routes
 import com.example.teatrope_kotlin_app.ui.theme.AccentRed
-import com.example.teatrope_kotlin_app.main.presentation.screens.HomeScreen
 
 data class BottomItem(val route: String, val label: String, val icon: @Composable () -> Unit)
 
@@ -81,7 +83,15 @@ fun MainScaffold(
                     onOpenTheater = { tid -> rootNav.navigate("theater/$tid") }
                 )
             }
-            composable(Routes.Profile)     { ProfileScreen(onOpenSettings = { rootNav.navigate(Routes.Settings) }, onLogout = onLogout) }
+            composable(Routes.Profile)     { 
+                ProfileScreen(
+                    onOpenSettings = { rootNav.navigate(Routes.Settings) }, 
+                    onLogout = onLogout,
+                    onOpenMyTickets = { rootNav.navigate(Routes.ComingSoon) }, 
+                    onOpenMyCreditCards = { rootNav.navigate(Routes.ComingSoon) }, 
+                    onOpenHistory = { rootNav.navigate(Routes.ComingSoon) }
+                )
+            }
         }
     }
 }

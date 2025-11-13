@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -33,9 +34,10 @@ fun DropdownSmall(
                 .background(Color.DarkGray.copy(alpha = 0.3f))
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = value, color = Color.White, fontSize = 14.sp)
+            Text(text = "$label:", color = Color.White.copy(alpha = 0.7f), fontSize = 14.sp)
+            Text(text = value, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             Icon(Icons.Default.ArrowDropDown, contentDescription = "Show options", tint = Color.White)
         }
 
